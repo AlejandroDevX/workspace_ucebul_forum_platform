@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Avatar, Badge, Card, CardBody, DataIcons, Empty } from 'ucebul_mui'
 import { PERMISSIONS } from '../app/navigation'
 import { useAuthStore } from '../features/auth/store/auth.store'
+import InProgressCourses from '../features/learning/components/InProgressCourses'
 import { applicationRoleName } from '../features/auth/utils/session-policy'
 
 interface Shortcut {
@@ -49,14 +50,7 @@ export default function DashboardPage() {
       {canLearn && (
         <section className="dashboard-section" aria-labelledby="continue-title">
           <h2 id="continue-title">Continuar aprendiendo</h2>
-          <Empty
-            icon={DataIcons.global.bookOutline}
-            title="Tu progreso aparecerá aquí"
-            text="Cuando el seguimiento de aprendizaje esté disponible podrás retomar tus lecciones desde este punto."
-            buttonIcon={DataIcons.buttons.arrowLongRight}
-            buttonText="Ir a mis cursos"
-            onClickButton={() => navigate('/my-courses')}
-          />
+          <InProgressCourses />
         </section>
       )}
 

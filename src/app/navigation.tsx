@@ -4,15 +4,21 @@ import { DataIcons } from 'ucebul_mui'
 // Slugs reales devueltos por Workspace en current_application_permissions.
 export const PERMISSIONS = {
   coursesView: 'forum.courses.view',
+  courseCreate: 'forum.courses.create',
+  courseUpdate: 'forum.courses.update',
+  lessonsView: 'forum.lessons.view',
+  lessonsCreate: 'forum.lessons.create',
+  lessonsUpdate: 'forum.lessons.update',
   learningView: 'forum.learning.view',
   communityView: 'forum.community.view',
   adminCourses: ['forum.courses.create', 'forum.courses.update', 'forum.courses.delete', 'forum.courses.publish'],
   adminCategories: ['forum.courses.create', 'forum.courses.update'],
+  adminLessons: ['forum.lessons.create', 'forum.lessons.update'],
   adminModeration: ['forum.moderation.view', 'forum.moderation.manage', 'forum.moderation.reports'],
 } as const
 
 export const ADMIN_PERMISSIONS: readonly string[] = [
-  ...new Set([...PERMISSIONS.adminCourses, ...PERMISSIONS.adminCategories, ...PERMISSIONS.adminModeration]),
+  ...new Set([...PERMISSIONS.adminCourses, ...PERMISSIONS.adminCategories, ...PERMISSIONS.adminLessons, ...PERMISSIONS.adminModeration]),
 ]
 
 export interface NavItem {

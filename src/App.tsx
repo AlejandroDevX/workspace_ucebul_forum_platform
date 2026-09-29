@@ -5,8 +5,13 @@ import ForumLayout from './layouts/ForumLayout'
 import AdminLayout from './layouts/AdminLayout'
 import CoursesPage from './features/courses/pages/CoursesPage'
 import AdminCoursesPage from './features/courses/pages/AdminCoursesPage'
-import AdminCategoriesPage from './features/courses/pages/AdminCategoriesPage'
+import CourseCategoriesPage from './features/courses/pages/CourseCategoriesPage'
+import CourseDetailPage from './features/courses/pages/CourseDetailPage'
+import CourseFormPage from './features/courses/pages/CourseFormPage'
+import LessonDetailPage from './features/lessons/pages/LessonDetailPage'
+import LessonFormPage from './features/lessons/pages/LessonFormPage'
 import CommunityPage from './features/community/pages/CommunityPage'
+import LearningPage from './features/learning/pages/LearningPage'
 import MyCoursesPage from './features/learning/pages/MyCoursesPage'
 import FavoritesPage from './features/favorites/pages/FavoritesPage'
 import ModerationPage from './features/moderation/pages/ModerationPage'
@@ -34,9 +39,14 @@ export default function App() {
           <Route path="dashboard" element={<DashboardPage />} />
           <Route element={<PermissionRoute permissions={[PERMISSIONS.coursesView]} />}>
             <Route path="courses" element={<CoursesPage />} />
+            <Route path="courses/:courseId" element={<CourseDetailPage />} />
+            <Route element={<PermissionRoute permissions={[PERMISSIONS.lessonsView]} />}>
+              <Route path="courses/:courseId/lessons/:lessonId" element={<LessonDetailPage />} />
+            </Route>
           </Route>
           <Route element={<PermissionRoute permissions={[PERMISSIONS.learningView]} />}>
             <Route path="my-courses" element={<MyCoursesPage />} />
+            <Route path="courses/:courseId/learn" element={<LearningPage />} />
           </Route>
           <Route element={<PermissionRoute permissions={[PERMISSIONS.communityView]} />}>
             <Route path="forum" element={<CommunityPage />} />
@@ -50,8 +60,20 @@ export default function App() {
             <Route element={<PermissionRoute permissions={PERMISSIONS.adminCourses} mode="any" />}>
               <Route path="courses" element={<AdminCoursesPage />} />
             </Route>
+            <Route element={<PermissionRoute permissions={[PERMISSIONS.courseCreate]} />}>
+              <Route path="courses/new" element={<CourseFormPage />} />
+            </Route>
+            <Route element={<PermissionRoute permissions={[PERMISSIONS.courseUpdate]} />}>
+              <Route path="courses/:courseId/edit" element={<CourseFormPage />} />
+            </Route>
+            <Route element={<PermissionRoute permissions={[PERMISSIONS.lessonsCreate]} />}>
+              <Route path="courses/:courseId/lessons/new" element={<LessonFormPage />} />
+            </Route>
+            <Route element={<PermissionRoute permissions={[PERMISSIONS.lessonsUpdate]} />}>
+              <Route path="courses/:courseId/lessons/:lessonId/edit" element={<LessonFormPage />} />
+            </Route>
             <Route element={<PermissionRoute permissions={PERMISSIONS.adminCategories} mode="any" />}>
-              <Route path="categories" element={<AdminCategoriesPage />} />
+              <Route path="categories" element={<CourseCategoriesPage />} />
             </Route>
             <Route element={<PermissionRoute permissions={PERMISSIONS.adminModeration} mode="any" />}>
               <Route path="moderation" element={<ModerationPage />} />

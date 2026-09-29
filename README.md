@@ -41,7 +41,7 @@ Las secciones de cursos, comunidad, aprendizaje y favoritos mantienen sus págin
 
 ```dotenv
 VITE_WORKSPACE_API_URL=http://localhost:8000/api
-VITE_FORUM_API_URL=http://localhost:8001/api
+VITE_FORUM_API_URL=http://localhost:8002/api
 VITE_APPLICATION_SLUG=ucebul-forum
 ```
 

@@ -8,6 +8,6 @@ function apiUrl(value: string | undefined, fallback: string): string {
 
 export const env = {
   workspaceApiUrl: apiUrl(import.meta.env.VITE_WORKSPACE_API_URL, 'http://localhost:8000/api'),
-  forumApiUrl: apiUrl(import.meta.env.VITE_FORUM_API_URL, 'http://localhost:8001/api'),
+  forumApiUrl: apiUrl(import.meta.env.VITE_FORUM_API_URL, 'http://localhost:8002/api'),
   applicationSlug: import.meta.env.VITE_APPLICATION_SLUG?.trim() || 'ucebul-forum',
 }

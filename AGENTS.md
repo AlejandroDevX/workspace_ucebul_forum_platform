@@ -205,7 +205,7 @@ Cancelar solicitudes obsoletas cuando corresponda.
 ## ENV
 
 VITE_WORKSPACE_API_URL=http://localhost:8000/api
-VITE_FORUM_API_URL=http://localhost:8001/api
+VITE_FORUM_API_URL=http://localhost:8002/api
 VITE_APPLICATION_SLUG=ucebul-forum
 
 ## CONTRATO BACKEND
@@ -267,3 +267,39 @@ Crear o actualizar AGENTS.md con estas reglas.
 - Mantener LoginPage, UnauthorizedPage, NotFoundPage, PublicRoute, PrivateRoute y PermissionRoute.
 - No implementar cursos durante esta tarea.
 - Ejecutar npm test para comprobar regresiones de autenticación, además de build y lint.
+
+## CURSOS — TAREA 03
+
+- Rutas del frontend: /courses (catálogo), /courses/:courseId (detalle), /admin/courses, /admin/courses/new, /admin/courses/:courseId/edit y /admin/categories.
+- El catálogo usa GET /forum/search/courses (search, forum_course_category_id, forum_course_level, page, per_page). GET /forum/courses no admite filtros y se usa en el listado de administración.
+- POST /forum/courses exige forum_course_slug (único, minúsculas, números y guiones). El formulario lo genera desde el título y permite editarlo.
+- No enviar forum_course_status, forum_course_instructor_workspace_user_id, forum_course_cover_path ni forum_course_published_at: la API responde 422.
+- La portada NO va en el POST/PUT del curso: se sube después con POST /forum/courses/{id}/cover, multipart con el campo `cover` (JPG/PNG/WebP, máx. 5120 KiB). Se muestra forum_course_cover_url.
+- Field upload registra solo el nombre del archivo: el File real se toma de onChange y se conserva en estado.
+- Field select registra option.value y reinicia su selección si cambia la referencia de items: memoizar items y controlar value desde el estado.
+- Select monta internamente un Field name="search" dentro del Form: no nombrar "search" a ningún campo propio.
+- Editar, eliminar, publicar y archivar exigen el permiso y además ser instructor del curso o tener forum.courses.manage-any; las acciones se ocultan si no se cumple.
+- forum_course_level es texto libre (máx. 50); el formulario ofrece Básico, Intermedio y Avanzado.
+- Pendiente de contrato: la API solo expone forum_course_instructor_workspace_user_id; no hay nombre de instructor. Se muestra "Tú" o "Instructor #ID".
+
+## LECCIONES — TAREA 04
+
+- Rutas: /courses/:courseId/lessons/:lessonId (detalle), /admin/courses/:courseId/lessons/new y /admin/courses/:courseId/lessons/:lessonId/edit.
+- Las lecciones se listan dentro del detalle del curso (CourseLessons) con GET /forum/courses/{course}/lessons recorriendo todas las páginas (per_page 100).
+- POST/PUT de lecciones exigen forum_lesson_slug y rechazan forum_lesson_position, forum_lesson_status y forum_lesson_course_id. El orden se cambia solo con PUT /forum/courses/{course}/lessons/reorder enviando TODOS los IDs; el campo "Orden" del formulario hace ese reorder después de guardar.
+- Gestionar lecciones y recursos exige ser el instructor del curso además del permiso; forum.courses.manage-any no basta.
+- Los recursos son privados: leerlos siempre con GET /forum/lesson-resources/{id} mediante forumApi (Bearer, responseType blob) y mostrarlos con URL.createObjectURL. No usar URLs de Storage ni el campo `url` (ya incluye /api) como src.
+- download=1 solo funciona si forum_lesson_resource_is_downloadable es true.
+- Subida de recursos: multipart con forum_lesson_resource_type, forum_lesson_resource_title, forum_lesson_resource_is_downloadable (1/0) y file. Video máx. 100 MiB; pdf, image y file máx. 20 MiB. Subidas y descargas de archivos usan timeout 0.
+- Un estudiante no inscrito solo ve las lecciones publicadas marcadas como vista previa; GET de una lección no preview responde 403 (inscripción requerida).
+- Pendiente de contrato: la API no devuelve forum_lesson_resource_path.
+
+## APRENDIZAJE Y PROGRESO — TAREA 05
+
+- Rutas: /my-courses (MyCoursesPage, pestañas En curso / Finalizados) y /courses/:courseId/learn (LearningPage). El detalle del curso y de la lección muestran inscripción y avance.
+- No existe un endpoint "¿estoy inscrito?": se usa GET /forum/courses/{id}/progress; 403 = no inscrito, 404 = curso no publicado.
+- forumApi admite `silentStatuses` para que un estado esperado (p. ej. 403 = no inscrito) no dispare el aviso global. Nunca silenciar 401.
+- Ningún endpoint de aprendizaje recibe workspace_user_id: la identidad sale del token.
+- La UI solo refleja resúmenes devueltos por la API (enroll, progress, complete). El porcentaje lo calcula Laravel y solo se redondea para mostrarlo (puede traer decimales de coma flotante).
+- Posición del video: createPositionSaver aplica throttling (máx. una petición cada 15 s y solo si avanzó 5 s o más), nunca dos peticiones simultáneas, y guarda siempre al pausar, terminar, ocultar la pestaña o salir de la lección. Solo se sigue el primer video de la lección.
+- Solo se registra avance en lecciones publicadas de cursos publicados donde el usuario está inscrito.

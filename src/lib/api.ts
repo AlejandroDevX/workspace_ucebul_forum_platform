@@ -5,6 +5,8 @@ declare module 'axios' {
   interface AxiosRequestConfig {
     skipSessionAuth?: boolean
     sessionVersion?: number
+    // Estados esperados por la pantalla (p. ej. 403 = no inscrito) que no deben mostrar el aviso global.
+    silentStatuses?: number[]
   }
 }
 
@@ -44,7 +46,8 @@ for (const api of [workspaceApi, forumApi]) {
   api.interceptors.response.use((response) => response, (error: unknown) => {
     if (axios.isAxiosError(error) && !error.config?.skipSessionAuth
       && error.config?.sessionVersion === session?.getVersion()
-      && [401, 403, 503].includes(error.response?.status ?? 0)) {
+      && [401, 403, 503].includes(error.response?.status ?? 0)
+      && !error.config?.silentStatuses?.includes(error.response?.status ?? 0)) {
       session?.onError(error)
     }
     return Promise.reject(error)
