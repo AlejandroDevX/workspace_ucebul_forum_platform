@@ -1,0 +1,135 @@
+/* ucebul_mui fija `main` a la altura de la ventana con scroll interno; el foro usa scroll de página. */
+main { height: auto; overflow: visible; padding: 0; }
+main:focus { outline: none; }
+
+.skip-link { position: fixed; top: 8px; left: 8px; z-index: 1100; background: #fff; padding: 16px; transform: translateY(-160%); }
+.skip-link:focus { transform: translateY(0); }
+
+.brand { display: flex; align-items: center; gap: 22px; }
+.brand strong { font-family: 'Arial Black', 'Trebuchet MS', sans-serif; letter-spacing: -.08em; font-size: 32px; color: var(--forest); }
+.brand strong span { color: #a57816; }
+.brand > span { border-left: 1px solid var(--line); padding-left: 22px; font-size: 14px; }
+
+.eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .14em; color: var(--forest); margin-bottom: 12px; }
+h2 { font-size: 22px; letter-spacing: -.03em; font-weight: 600; }
+.feature-icon { display: inline-flex; align-items: center; justify-content: center; background: #eef4f0; color: var(--forest); width: 42px; height: 42px; border-radius: 8px; margin-bottom: 16px; font-size: 21px; }
+.text-link { display: inline-flex; align-items: center; gap: 12px; margin-top: 20px; color: var(--forest); font-size: 14px; font-weight: 600; }
+.text-link span { display: inline-flex; }
+.text-link:hover { text-decoration: underline; }
+
+/* ---------- Shell: Sidebar + Header de ucebul_mui ---------- */
+.app-shell { min-height: 100vh; display: flex; background: #f5f8f7; }
+.app-shell__body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.app-shell .header { position: sticky; top: 0; z-index: 20; min-height: 64px; background: #fff; border-bottom: 1px solid var(--line); gap: 16px; justify-content: space-between; }
+.app-shell .header__title { color: var(--forest); font-size: 18px; letter-spacing: -.02em; }
+/* El foro no tiene notificaciones, perfil ni cambio de contraseña: se ocultan las acciones sin destino. */
+.app-shell .header__notifications,
+.app-shell .header__menu__list li:not(:last-child) { display: none; }
+.app-shell .header__menu__list li:last-child { margin-top: 0; padding-top: 0; border-top: 0; }
+.app-shell--admin .header__title::before { content: 'UCEBUL · '; color: var(--muted); font-weight: 600; }
+
+.app-shell main { flex: 1; width: 100%; max-width: 1120px; margin-inline: auto; padding: 36px clamp(16px, 4vw, 48px) 56px; }
+.site-footer { width: 100%; max-width: 1120px; margin-inline: auto; padding: 20px clamp(16px, 4vw, 48px); border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 8px 20px; flex-wrap: wrap; color: var(--muted); font-size: 12px; }
+.site-footer strong { font-weight: 600; }
+
+.app-shell__toolbar { display: none; }
+.app-shell__current { display: none; font-weight: 600; color: var(--forest); }
+.quick-nav a { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 14px; font-weight: 600; border-radius: 8px; }
+.quick-nav a.active { color: var(--forest); background: var(--mint); }
+.quick-nav__icon { display: inline-flex; }
+
+@media (min-width: 992px) {
+  .app-shell .sidebar { position: sticky; top: 0; height: 100vh; flex-shrink: 0; }
+}
+
+/* Tablet: menú lateral en panel + accesos rápidos en fila desplazable. */
+@media (max-width: 991.98px) {
+  .app-shell__toolbar { position: sticky; top: 64px; z-index: 15; display: flex; align-items: center; gap: 12px; padding: 8px clamp(16px, 4vw, 48px); background: #fff; border-bottom: 1px solid var(--line); }
+  .quick-nav { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+  .quick-nav a { padding: 8px 12px; white-space: nowrap; min-height: 40px; }
+  .quick-nav a:hover { color: var(--forest); background: #f5f8f7; }
+}
+
+/* Móvil: barra inferior compacta con iconos; una columna de contenido. */
+@media (max-width: 767.98px) {
+  .app-shell .header { padding-inline: 16px !important; }
+  .app-shell__toolbar { padding: 6px 16px; }
+  .app-shell__current { display: block; }
+  .quick-nav { position: fixed; inset: auto 0 0 0; z-index: 30; justify-content: space-around; gap: 0; padding: 4px 4px calc(4px + env(safe-area-inset-bottom)); background: #fff; border-top: 1px solid var(--line); box-shadow: 0 -4px 16px rgb(18 77 67 / 6%); }
+  .quick-nav a { flex: 1 1 0; min-width: 0; flex-direction: column; gap: 2px; padding: 6px 2px; min-height: 52px; justify-content: center; font-size: 11px; }
+  .quick-nav__icon svg { width: 22px; height: 22px; }
+  .quick-nav__label { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+  .app-shell main { padding: 24px 16px 40px; }
+  .app-shell__body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+  .site-footer { flex-direction: column; }
+}
+
+.global-error { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+
+/* ---------- Páginas ---------- */
+.page-heading { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.page-heading .eyebrow { margin-bottom: 0; }
+.page-section h1 { font-size: clamp(28px, 4vw, 40px); letter-spacing: -.04em; margin-bottom: 14px; }
+.page-intro { color: var(--muted); line-height: 1.7; max-width: 650px; }
+.availability-card { margin-top: 32px; }
+.availability-card .empty { border: 0; background: transparent; }
+
+.dashboard { display: grid; gap: 40px; }
+.dashboard-welcome { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 24px; padding: 32px; background: var(--mint); border-radius: 8px; }
+.dashboard-welcome__avatar { background: var(--forest); font-size: 24px; }
+.dashboard-welcome h1 { font-size: clamp(28px, 4vw, 40px); letter-spacing: -.04em; line-height: 1.15; }
+.dashboard-welcome__copy > p:not(.eyebrow) { margin-top: 10px; color: #3a5d51; line-height: 1.7; max-width: 560px; }
+.dashboard-welcome__role { align-self: start; }
+.dashboard-section h2 { margin-bottom: 16px; }
+.dashboard-section .empty { background: #fff; }
+
+.shortcut-grid { list-style: none; margin: 24px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+.dashboard-section .shortcut-grid { margin-top: 0; }
+.shortcut-grid > li { display: flex; }
+.shortcut-card { flex: 1; display: flex; flex-direction: column; }
+.shortcut-card .ui-card__body { flex: 1; display: flex; flex-direction: column; align-items: flex-start; padding: 24px; }
+.shortcut-card h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+.shortcut-card p { color: var(--muted); line-height: 1.65; font-size: 14px; }
+.shortcut-card .text-link { margin-top: auto; padding-top: 20px; }
+
+@media (max-width: 767.98px) {
+  .dashboard { gap: 32px; }
+  .dashboard-welcome { grid-template-columns: auto 1fr; padding: 24px 20px; gap: 16px; }
+  .dashboard-welcome__role { grid-column: 1 / -1; justify-self: start; }
+  .shortcut-grid { grid-template-columns: 1fr; gap: 16px; }
+  .global-error { align-items: flex-start; flex-direction: column; }
+}
+
+/* ---------- Acceso (AuthLayout) ---------- */
+.auth-layout { width: min(1040px, calc(100% - 32px)); margin-inline: auto; padding-block: 48px; }
+.auth-layout__brand { margin-bottom: 40px; }
+.login-panel { display: grid; grid-template-columns: 1fr 1.1fr; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: #fff; }
+.login-intro { background: var(--forest); color: #fff; padding: 48px 40px; display: flex; flex-direction: column; align-items: flex-start; }
+.login-intro .eyebrow { color: var(--ochre); line-height: 1.7; }
+.login-intro h1 { font: 400 clamp(40px, 5vw, 60px)/1.08 Georgia, serif; letter-spacing: -.04em; margin: 28px 0; }
+.login-intro > p:not(.eyebrow) { color: var(--mint); line-height: 1.7; max-width: 270px; }
+.login-community-icon { display: inline-flex; font-size: 40px; color: var(--ochre); margin-top: auto; padding-top: 48px; }
+.login-form-panel { padding: 48px 40px; min-width: 0; }
+.login-form-panel > p { margin-top: 14px; line-height: 1.6; color: var(--muted); font-size: 14px; }
+.login-form { display: grid; gap: 22px; margin-top: 28px; }
+.login-form > div { min-width: 0; }
+.login-form input { width: 100%; min-width: 0; }
+.login-form button[type='submit'] { width: 100%; background: var(--forest); color: white; min-height: 46px; }
+.login-form-panel .login-help { font-size: 12px; margin-top: 26px; }
+.auth-error { border: 1px solid #d9a99c; border-radius: 4px; background: #fff5f1; color: #823725; padding: 14px; font-size: 14px; line-height: 1.6; overflow-wrap: anywhere; }
+.field-server-error { color: #823725; font-size: 13px; margin-top: 8px; }
+.session-screen { min-height: 60vh; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 24px; max-width: 720px; padding: 32px 16px; margin-inline: auto; }
+.session-screen h1 { font-size: clamp(28px, 4vw, 42px); letter-spacing: -.035em; }
+.session-screen p { line-height: 1.7; }
+.auth-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; }
+.auth-actions .text-link { margin-top: 0; }
+@media (max-width: 620px) {
+  .auth-layout { padding-block: 24px; }
+  .auth-layout__brand { margin-bottom: 24px; }
+  .login-panel { grid-template-columns: 1fr; }
+  .login-intro { padding: 28px 24px; }
+  .login-intro h1 { margin: 4px 0 18px; }
+  .login-intro h1 br { display: none; }
+  .login-community-icon { display: none; }
+  .login-form-panel { padding: 30px 24px; }
+}
