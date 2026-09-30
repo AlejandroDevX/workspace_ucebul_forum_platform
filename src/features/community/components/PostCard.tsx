@@ -1,15 +1,18 @@
 import { useState } from 'react'
-import { Badge, Button, Card, CardBody, Dialog, Spinner } from 'ucebul_mui'
+import { Badge, Button, Card, CardBody, DataIcons, Dialog, Divider, DropdownMenu, type DropdownMenuItem, Spinner } from 'ucebul_mui'
+import ButtonIcon from '../../../components/ButtonIcon'
 import { toApiError } from '../../../lib/api-error'
 import { deletePost, listAllReplies } from '../api/post.service'
 import type { ForumPost, ForumTopic } from '../types/community.types'
-import { authorLabel, formatDateTime, mergePosts, wasEdited } from '../utils/community-format'
+import { authorLabel, mergePosts, wasEdited } from '../utils/community-format'
 import { useCommunityPermissions } from '../utils/useCommunityPermissions'
 import AcceptedAnswerBadge from './AcceptedAnswerBadge'
+import AuthorLine from './AuthorLine'
 import ReactionButtons from './ReactionButtons'
 import ReplyForm from './ReplyForm'
 import ContentVisibilityButton from '../../moderation/components/ContentVisibilityButton'
-import ReportButton from '../../moderation/components/ReportButton'
+import ReportFormModal from '../../moderation/components/ReportFormModal'
+import { useModerationPermissions } from '../../moderation/utils/useModerationPermissions'
 
 // A partir de este nivel las respuestas ya no se indentan (evita anidamiento excesivo en móvil).
 const MAX_INDENT_DEPTH = 2
@@ -25,6 +28,7 @@ interface Props {
 
 export default function PostCard({ post, topic, depth = 0, onChange, onDeleted, onAccept }: Props) {
   const permissions = useCommunityPermissions()
+  const { canReport } = useModerationPermissions()
   const [mode, setMode] = useState<'view' | 'reply' | 'edit'>('view')
   const [replies, setReplies] = useState<ForumPost[] | null>(null)
   const [showReplies, setShowReplies] = useState(false)
@@ -32,6 +36,8 @@ export default function PostCard({ post, topic, depth = 0, onChange, onDeleted, 
   const [busy, setBusy] = useState<'delete' | 'accept' | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [reporting, setReporting] = useState(false)
+  const [notice, setNotice] = useState<string | null>(null)
 
   const id = post.forum_post_id
   const accepted = topic.forum_topic_accepted_post_id === id
@@ -90,6 +96,20 @@ export default function PostCard({ post, topic, depth = 0, onChange, onDeleted, 
     }
   }
 
+  async function copyLink() {
+    const url = `${window.location.origin}${window.location.pathname}#post-${id}`
+    try {
+      await navigator.clipboard.writeText(url)
+      setNotice('Enlace copiado')
+    } catch {
+      setError('No se pudo copiar el enlace.')
+    }
+  }
+
+  const menuItems: DropdownMenuItem[] = [{ label: 'Copiar enlace', onSelect: () => void copyLink() }]
+  if (canReport && !mine) menuItems.push({ label: 'Reportar', onSelect: () => setReporting(true) })
+  const author = authorLabel(post.forum_post_workspace_user_id, permissions.isMine, post.forum_post_workspace_user)
+
   const canAccept = permissions.canAccept(topic) && !accepted && post.forum_post_status === 'published' && topic.forum_topic_status !== 'hidden'
 
   return (
@@ -97,11 +117,13 @@ export default function PostCard({ post, topic, depth = 0, onChange, onDeleted, 
       <Card className={`post-card ${accepted ? 'post-card--accepted' : ''} ${mine ? 'post-card--mine' : ''}`}>
         <CardBody>
           <header className="post-card__header">
-            <span className="post-card__author">{authorLabel(post.forum_post_workspace_user_id, permissions.isMine, post.forum_post_workspace_user)}</span>
-            <time dateTime={post.forum_post_created_at}>{formatDateTime(post.forum_post_created_at)}</time>
-            {wasEdited(post.forum_post_created_at, post.forum_post_updated_at) && <span className="muted">(editada)</span>}
-            {accepted && <AcceptedAnswerBadge />}
-            {post.forum_post_status === 'hidden' && <Badge variant="warning">Oculta por moderación</Badge>}
+            <AuthorLine layout="stacked" name={author} date={post.forum_post_created_at}
+              edited={wasEdited(post.forum_post_created_at, post.forum_post_updated_at)}>
+              {accepted && <AcceptedAnswerBadge />}
+              {post.forum_post_status === 'hidden' && <Badge variant="warning">Oculta por moderación</Badge>}
+            </AuthorLine>
+            <DropdownMenu align="end" items={menuItems}
+              trigger={<span className="post-card__menu"><span aria-hidden="true">•••</span><span className="sr-only">Más opciones de la respuesta de {author}</span></span>} />
           </header>
 
           {mode === 'edit'
@@ -109,25 +131,31 @@ export default function PostCard({ post, topic, depth = 0, onChange, onDeleted, 
                 onSaved={(saved) => { onChange({ ...post, ...saved }); setMode('view') }} onCancel={() => setMode('view')} />
             : <div className="post-card__body">{post.forum_post_body}</div>}
 
-          {mode !== 'edit' && <footer className="post-card__footer">
-            <ReactionButtons post={post} canReact={permissions.canReact} onChange={onChange} />
-            <div className="post-card__actions">
-              {permissions.canReply(topic) && <Button size="sm" variant="default" aria-expanded={mode === 'reply'}
-                onClick={() => setMode(mode === 'reply' ? 'view' : 'reply')}>Responder</Button>}
-              {canAccept && <Button size="sm" variant="primary--outline" loading={busy === 'accept'} disabled={busy !== null}
-                onClick={() => void accept()}>{topic.forum_topic_accepted_post_id ? 'Aceptar esta en su lugar' : 'Aceptar como solución'}</Button>}
-              {permissions.canEditPost(post) && <Button size="sm" variant="default" disabled={busy !== null} onClick={() => setMode('edit')}>Editar</Button>}
-              {permissions.canDeletePost(post) && <Button size="sm" variant="danger--outline" loading={busy === 'delete'} disabled={busy !== null}
-                onClick={() => setConfirmDelete(true)}>Eliminar</Button>}
-              {!mine && <ReportButton target={{ kind: 'post', id }} />}
-              <ContentVisibilityButton kind="post" id={id} hidden={post.forum_post_status === 'hidden'}
-                onChanged={(changed) => onChange({ ...post, ...changed })} />
+          {mode !== 'edit' && <>
+            <Divider className="post-card__divider" />
+            <div className="post-card__footer">
+              <ReactionButtons post={post} canReact={permissions.canReact} onChange={onChange} />
+              <Divider orientation="vertical" className="post-card__footer-divider" />
+              <div className="post-card__actions">
+                {permissions.canReply(topic) && <Button size="md" variant="default" aria-expanded={mode === 'reply'}
+                  onClick={() => setMode(mode === 'reply' ? 'view' : 'reply')}><ButtonIcon icon={DataIcons.navigation.chats} />Responder</Button>}
+                {canAccept && <Button size="md" variant="primary--outline" className="post-card__accept" loading={busy === 'accept'} disabled={busy !== null}
+                  onClick={() => void accept()}><ButtonIcon icon={DataIcons.global.checkOutline} />
+                  {topic.forum_topic_accepted_post_id ? 'Aceptar esta en su lugar' : 'Aceptar como solución'}</Button>}
+                {permissions.canEditPost(post) && <Button size="md" variant="default" disabled={busy !== null}
+                  onClick={() => setMode('edit')}><ButtonIcon icon={DataIcons.global.pencilOutline} />Editar</Button>}
+                <ContentVisibilityButton kind="post" id={id} hidden={post.forum_post_status === 'hidden'} size="md"
+                  onChanged={(changed) => onChange({ ...post, ...changed })} />
+                {permissions.canDeletePost(post) && <Button size="md" variant="danger--outline" loading={busy === 'delete'} disabled={busy !== null}
+                  onClick={() => setConfirmDelete(true)}><ButtonIcon icon={DataIcons.global.trashOutline} />Eliminar</Button>}
+              </div>
             </div>
-          </footer>}
+          </>}
+          {notice && <p className="report-sent" role="status"><span aria-hidden="true">{DataIcons.global.checkOutline}</span> {notice}</p>}
           {error && <p className="auth-error" role="alert">{error}</p>}
 
           {mode === 'reply' && <ReplyForm topicId={topic.forum_topic_id} parentId={id}
-            label={`Responder a ${authorLabel(post.forum_post_workspace_user_id, permissions.isMine, post.forum_post_workspace_user)}`}
+            label={`Responder a ${author}`}
             onSaved={(reply) => void onReplySaved(reply)} onCancel={() => setMode('view')} />}
         </CardBody>
       </Card>
@@ -148,6 +176,8 @@ export default function PostCard({ post, topic, depth = 0, onChange, onDeleted, 
         <Button size="sm" variant="default" className="post-replies-toggle" aria-expanded onClick={() => setShowReplies(false)}>Ocultar respuestas</Button>
       </>}
 
+      {canReport && !mine && <ReportFormModal target={{ kind: 'post', id }} open={reporting} onClose={() => setReporting(false)}
+        onReported={() => { setReporting(false); setNotice('Reporte enviado') }} />}
       <Dialog open={confirmDelete} typeDialog="danger" titleDialog="Eliminar respuesta"
         textDialog="Se eliminará esta respuesta y también las respuestas que dependen de ella."
         buttonCancelDialog="Cancelar" buttonConfirmDialog="Eliminar"

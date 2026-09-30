@@ -352,3 +352,12 @@ Crear o actualizar AGENTS.md con estas reglas.
 - Páginas con React.lazy y Suspense dentro de AppShell. vite.config.ts elimina el WASM de ONNX no referenciado.
 - Portadas y visor de imágenes usan Image de ucebul_mui; el CSS actúa sobre .image-container y respeta su estado --loading.
 - Workspace no define forum.community.manage-any ni forum.courses.manage-any: nadie puede crear categorías del foro (pendiente de decisión).
+
+## SHELL Y DASHBOARD — BRANDING
+
+- Sidebar, Header y Footer usan los estilos de ucebul_mui sin sobrescribir colores; el CSS del proyecto solo ajusta disposición. Sidebar va con variant="dark"; Header sin buscador (no pasar onSearchChange).
+- No redefinir en :root tokens de ucebul_mui (--ink, --green-*, --dark-*, --light*, --border-color, --status-*…). El color de texto del proyecto es --app-ink: --ink es el fondo del sidebar oscuro.
+- En escritorio ucebul_mui pinta la navegación con vertical-navigation--light aunque el Sidebar sea dark: App.css reaplica sus tokens de navegación oscura bajo .sidebar--dark.
+- El título del Header es la sección activa. El Sidebar muestra «Menú» fijo: no admite logo por props.
+- Dashboard: GET /forum/my-courses (compartido con InProgressCourses vía la prop enrollments), GET /forum/search/courses para recomendados (excluye inscritos) y GET /forum/topics per_page 5 para actividad. No existe conteo de participación del usuario en el foro; no se muestra.
+- La imagen del hero (src/assets/dashboard-hero.webp) es una copia comprimida de background-login-3 de ucebul_mui (el paquete no exporta sus assets).

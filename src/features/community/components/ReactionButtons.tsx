@@ -29,7 +29,7 @@ export default function ReactionButtons({ post, canReact, onChange }: { post: Fo
   }
 
   const button = (type: ForumReactionType, count: number, label: string) => (
-    <Button size="sm" variant={current === type ? 'primary' : 'default'}
+    <Button size="md" variant={current === type ? 'primary--outline' : 'default'}
       className={`reaction-button reaction-button--${type} ${current === type ? 'is-active' : ''}`}
       aria-pressed={current === type} disabled={!canReact || busy} onClick={() => void vote(type)}
       title={canReact ? (current === type ? 'Quitar mi voto' : label) : 'No tienes permiso para votar'}>

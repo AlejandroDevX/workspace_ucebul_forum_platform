@@ -35,3 +35,22 @@ export function mergePosts(current: ForumPost[], incoming: ForumPost[]) {
   const seen = new Set(current.map((post) => post.forum_post_id))
   return [...current, ...incoming.filter((post) => !seen.has(post.forum_post_id))]
 }
+
+const RELATIVE_UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
+  ['year', 31_536_000], ['month', 2_592_000], ['week', 604_800], ['day', 86_400], ['hour', 3_600], ['minute', 60],
+]
+
+// «Hace 2 horas»; por debajo de un minuto, «Hace un momento».
+export function formatRelativeTime(value: string, now = Date.now()) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  const seconds = Math.round((date.getTime() - now) / 1000)
+  const format = new Intl.RelativeTimeFormat('es-CO', { numeric: 'auto' })
+  for (const [unit, size] of RELATIVE_UNITS) {
+    if (Math.abs(seconds) >= size) {
+      const text = format.format(Math.trunc(seconds / size), unit)
+      return text.charAt(0).toUpperCase() + text.slice(1)
+    }
+  }
+  return 'Hace un momento'
+}

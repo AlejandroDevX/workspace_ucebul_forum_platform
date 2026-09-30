@@ -8,5 +8,7 @@ export const topicValidators = {
     maxLength(65535, 'El contenido admite máximo 65.535 caracteres.')),
 }
 
+export const POST_MAX_LENGTH = 65535
+
 export const postValidator = compose(required('Escribe tu respuesta.'), minLength(5, 'La respuesta debe tener al menos 5 caracteres.'),
-  maxLength(65535, 'La respuesta admite máximo 65.535 caracteres.'))
+  maxLength(POST_MAX_LENGTH, 'La respuesta admite máximo 65.535 caracteres.'))

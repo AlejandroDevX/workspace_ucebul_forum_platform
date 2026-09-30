@@ -1,21 +1,30 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { Badge, Button, Card, CardBody, DataIcons, Dialog, Empty, Spinner } from 'ucebul_mui'
+import { Badge, Button, Card, CardBody, DataIcons, Dialog, Divider, Empty, Spinner } from 'ucebul_mui'
+import ButtonIcon from '../../../components/ButtonIcon'
 import { toApiError } from '../../../lib/api-error'
 import { useRequest } from '../../../lib/useRequest'
 import { listPosts } from '../api/post.service'
 import { acceptAnswer, closeTopic, deleteTopic, getTopic, reopenTopic } from '../api/topic.service'
 import AcceptedAnswerBadge from '../components/AcceptedAnswerBadge'
+import AuthorLine from '../components/AuthorLine'
 import PostCard from '../components/PostCard'
 import ReplyForm from '../components/ReplyForm'
 import type { ForumPost, ForumTopic } from '../types/community.types'
-import { authorLabel, formatDateTime, mergePosts, wasEdited } from '../utils/community-format'
+import { authorLabel, mergePosts, wasEdited } from '../utils/community-format'
 import { useCommunityPermissions } from '../utils/useCommunityPermissions'
 import ContentVisibilityButton from '../../moderation/components/ContentVisibilityButton'
 import ReportButton from '../../moderation/components/ReportButton'
 import FavoriteButton from '../../favorites/components/FavoriteButton'
 
 const POSTS_PER_PAGE = 20
+
+const REPLY_TIPS = [
+  'Comparte tu experiencia o conocimientos.',
+  'Sé claro y conciso.',
+  'Si es posible, incluye fuentes o referencias.',
+  'Mantén un tono respetuoso.',
+]
 
 export default function TopicDetailPage() {
   const navigate = useNavigate()
@@ -120,40 +129,43 @@ function TopicView({ topic, onTopicChange }: { topic: ForumTopic; onTopicChange:
 
   return (
     <div className="topic-page">
-      <Link className="back-link" to={topic.category ? `/forum/categories/${topic.forum_topic_category_id}` : '/forum'}>
-        <span aria-hidden="true">{DataIcons.buttons.arrowLongLeft}</span> {topic.category?.forum_category_name ?? 'Foro técnico'}</Link>
+      <div className="topic-page__nav">
+        <Link className="back-link" to="/forum"><span aria-hidden="true">{DataIcons.buttons.arrowLongLeft}</span> Volver al foro</Link>
+        {topic.category && <Link className="topic-page__category" to={`/forum/categories/${topic.forum_topic_category_id}`}>
+          <Badge variant="success"><span className="badge-icon" aria-hidden="true">{DataIcons.navigation.chats}</span>{topic.category.forum_category_name}</Badge>
+        </Link>}
+      </div>
 
       <article className="topic-question" aria-labelledby="topic-title">
         <Card className="topic-question__card"><CardBody>
-          <p className="topic-question__label">Pregunta</p>
-          <div className="course-card__tags">
-            {topic.forum_topic_accepted_post_id && <AcceptedAnswerBadge label="Resuelta" />}
-            {topic.forum_topic_status === 'closed' && <Badge>Cerrada</Badge>}
-            {topic.forum_topic_status === 'hidden' && <Badge variant="warning">Oculta por moderación</Badge>}
-            {topic.course && <Link to={`/courses/${topic.course.forum_course_id}`} className="topic-question__course">
-              <Badge><span className="badge-icon" aria-hidden="true">{DataIcons.global.bookOutline}</span>{topic.course.forum_course_title}</Badge></Link>}
-          </div>
-          <div className="detail-title-row">
-            <h1 id="topic-title">{topic.forum_topic_title}</h1>
+          <div className="topic-question__head">
+            <div className="course-card__tags">
+              <Badge variant="success" className="topic-question__label">Pregunta</Badge>
+              {topic.forum_topic_accepted_post_id && <AcceptedAnswerBadge label="Resuelta" />}
+              {topic.forum_topic_status === 'closed' && <Badge>Cerrada</Badge>}
+              {topic.forum_topic_status === 'hidden' && <Badge variant="warning">Oculta por moderación</Badge>}
+              {topic.course && <Link to={`/courses/${topic.course.forum_course_id}`} className="topic-question__course">
+                <Badge><span className="badge-icon" aria-hidden="true">{DataIcons.global.bookOutline}</span>{topic.course.forum_course_title}</Badge></Link>}
+            </div>
             <FavoriteButton kind="topic" id={topicId} title={topic.forum_topic_title} />
           </div>
-          <p className="topic-question__meta">
-            {authorLabel(topic.forum_topic_workspace_user_id, permissions.isMine, topic.forum_topic_workspace_user)} · {formatDateTime(topic.forum_topic_created_at)}
-            {wasEdited(topic.forum_topic_created_at, topic.forum_topic_updated_at) && ' · editada'}
-          </p>
+          <h1 id="topic-title">{topic.forum_topic_title}</h1>
+          <AuthorLine name={authorLabel(topic.forum_topic_workspace_user_id, permissions.isMine, topic.forum_topic_workspace_user)}
+            date={topic.forum_topic_created_at} edited={wasEdited(topic.forum_topic_created_at, topic.forum_topic_updated_at)} />
           <div className="topic-question__body">{topic.forum_topic_body}</div>
+          <Divider className="topic-question__divider" />
           <div className="topic-question__actions">
-            {canEdit && <Button size="sm" variant="default" disabled={busy !== null}
-              onClick={() => navigate(`/forum/topics/${topicId}/edit`)}>Editar</Button>}
-            {canEdit && topic.forum_topic_status === 'open' && <Button size="sm" variant="secondary--outline" loading={busy === 'close'}
-              disabled={busy !== null} onClick={() => void transition('close')}>Cerrar pregunta</Button>}
-            {canEdit && topic.forum_topic_status === 'closed' && <Button size="sm" variant="primary--outline" loading={busy === 'reopen'}
-              disabled={busy !== null} onClick={() => void transition('reopen')}>Reabrir</Button>}
-            {permissions.canDeleteTopic(topic) && <Button size="sm" variant="danger--outline" loading={busy === 'delete'}
-              disabled={busy !== null} onClick={() => setConfirmDelete(true)}>Eliminar</Button>}
-            {!permissions.isMine(topic.forum_topic_workspace_user_id) && <ReportButton target={{ kind: 'topic', id: topicId }} />}
-            <ContentVisibilityButton kind="topic" id={topicId} hidden={topic.forum_topic_status === 'hidden'}
+            {canEdit && <Button size="md" variant="default" disabled={busy !== null}
+              onClick={() => navigate(`/forum/topics/${topicId}/edit`)}><ButtonIcon icon={DataIcons.global.pencilOutline} />Editar</Button>}
+            {canEdit && topic.forum_topic_status === 'open' && <Button size="md" variant="default" loading={busy === 'close'}
+              disabled={busy !== null} onClick={() => void transition('close')}><ButtonIcon icon={DataIcons.global.lockClosedOutline} />Cerrar pregunta</Button>}
+            {canEdit && topic.forum_topic_status === 'closed' && <Button size="md" variant="primary--outline" loading={busy === 'reopen'}
+              disabled={busy !== null} onClick={() => void transition('reopen')}><ButtonIcon icon={DataIcons.global.reloadOutline} />Reabrir</Button>}
+            <ContentVisibilityButton kind="topic" id={topicId} hidden={topic.forum_topic_status === 'hidden'} size="md"
               onChanged={(changed) => onTopicChange({ ...topic, ...changed })} />
+            {permissions.canDeleteTopic(topic) && <Button size="md" variant="danger--outline" loading={busy === 'delete'}
+              disabled={busy !== null} onClick={() => setConfirmDelete(true)}><ButtonIcon icon={DataIcons.global.trashOutline} />Eliminar</Button>}
+            {!permissions.isMine(topic.forum_topic_workspace_user_id) && <ReportButton target={{ kind: 'topic', id: topicId }} />}
           </div>
           {actionError && <p className="auth-error" role="alert">{actionError}</p>}
         </CardBody></Card>
@@ -162,7 +174,8 @@ function TopicView({ topic, onTopicChange }: { topic: ForumTopic; onTopicChange:
       {accepted && <section className="accepted-answer" aria-labelledby="accepted-title">
         <h2 id="accepted-title"><span aria-hidden="true">{DataIcons.global.checkOutline}</span> Solución aceptada</h2>
         <Card className="accepted-answer__card"><CardBody>
-          <p className="topic-question__meta">{authorLabel(accepted.forum_post_workspace_user_id, permissions.isMine, accepted.forum_post_workspace_user)} · {formatDateTime(accepted.forum_post_created_at)}</p>
+          <AuthorLine layout="stacked" name={authorLabel(accepted.forum_post_workspace_user_id, permissions.isMine, accepted.forum_post_workspace_user)}
+            date={accepted.forum_post_created_at} />
           <div className="post-card__body">{accepted.forum_post_body}</div>
           <a className="text-link" href={`#post-${accepted.forum_post_id}`}>Ver en la conversación</a>
         </CardBody></Card>
@@ -184,15 +197,25 @@ function TopicView({ topic, onTopicChange }: { topic: ForumTopic; onTopicChange:
       </section>
 
       <section className="topic-reply" aria-labelledby="reply-title">
-        <h2 id="reply-title">Responder</h2>
-        {permissions.canReply(topic)
-          ? <Card><CardBody>
-              <ReplyForm topicId={topicId} label="Tu respuesta"
-                onSaved={(post) => { setPosts((current) => mergePosts(current, [post])); refreshTopic() }} />
-            </CardBody></Card>
-          : <p className="muted">{topic.forum_topic_status === 'open'
-              ? 'No tienes permiso para responder en el foro.'
-              : 'Esta pregunta está cerrada y no admite nuevas respuestas.'}</p>}
+        <Card><CardBody className="topic-reply__layout">
+          <div className="topic-reply__main">
+            <h2 id="reply-title">Responder</h2>
+            {permissions.canReply(topic)
+              ? <ReplyForm topicId={topicId} label="Tu respuesta" placeholder="Escribe tu respuesta aquí…"
+                  hint="Sé claro y aporta información útil para la comunidad." submitIcon={DataIcons.global.airplaneOutline}
+                  onSaved={(post) => { setPosts((current) => mergePosts(current, [post])); refreshTopic() }} />
+              : <p className="muted">{topic.forum_topic_status === 'open'
+                  ? 'No tienes permiso para responder en el foro.'
+                  : 'Esta pregunta está cerrada y no admite nuevas respuestas.'}</p>}
+          </div>
+          <Divider orientation="vertical" className="topic-reply__divider" />
+          <aside className="topic-reply__tips" aria-labelledby="reply-tips-title">
+            <h3 id="reply-tips-title"><span aria-hidden="true">{DataIcons.alert.info}</span> Consejos para una buena respuesta</h3>
+            <ul>
+              {REPLY_TIPS.map((tip) => <li key={tip}><span aria-hidden="true">{DataIcons.global.checkOutline}</span>{tip}</li>)}
+            </ul>
+          </aside>
+        </CardBody></Card>
       </section>
 
       <Dialog open={confirmDelete} typeDialog="danger" titleDialog="Eliminar pregunta"

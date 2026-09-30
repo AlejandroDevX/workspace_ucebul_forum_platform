@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Button, DataIcons } from 'ucebul_mui'
+import ButtonIcon from '../../../components/ButtonIcon'
 import type { ReportTarget } from '../types/moderation.types'
 import { useModerationPermissions } from '../utils/useModerationPermissions'
 import ReportFormModal from './ReportFormModal'
@@ -15,7 +16,7 @@ export default function ReportButton({ target }: { target: ReportTarget }) {
     <>
       {sent
         ? <span className="report-sent" role="status"><span aria-hidden="true">{DataIcons.global.checkOutline}</span> Reporte enviado</span>
-        : <Button size="sm" variant="default" onClick={() => setOpen(true)}>Reportar</Button>}
+        : <Button size="md" variant="default" onClick={() => setOpen(true)}><ButtonIcon icon={DataIcons.alert.warning} />Reportar</Button>}
       <ReportFormModal target={target} open={open} onClose={() => setOpen(false)}
         onReported={() => { setOpen(false); setSent(true) }} />
     </>

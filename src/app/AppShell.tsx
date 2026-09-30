@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { Button, DataIcons, Header, IconButton, Sidebar, Spinner } from 'ucebul_mui'
+import { Button, DataIcons, Footer, Header, IconButton, Sidebar, Spinner } from 'ucebul_mui'
 import { useAuthStore } from '../features/auth/store/auth.store'
 import { permissionSlugs } from '../features/auth/utils/session-policy'
 import { type NavGroup, type NavItem, visibleGroups } from './navigation'
@@ -70,9 +70,9 @@ export default function AppShell({ variant, title, navigation }: Props) {
   return (
     <div className={`app-shell app-shell--${variant}`}>
       <a className="skip-link" href="#contenido">Saltar al contenido</a>
-      <Sidebar navigationData={sidebarData} openMenu={openMenu} setOpenMenu={setOpenMenu} />
+      <Sidebar navigationData={sidebarData} variant="dark" openMenu={openMenu} setOpenMenu={setOpenMenu} />
       <div className="app-shell__body">
-        <Header title={title} username={username || 'Usuario'} onLogout={() => void logout()} />
+        <Header title={active?.title ?? title} username={username || 'Usuario'} onLogout={() => void logout()} />
         <div className="app-shell__toolbar">
           <IconButton icon={DataIcons.navigation.menu} label="Abrir menú de navegación" variant="default"
             aria-expanded={openMenu} onClick={() => setOpenMenu(true)} />
@@ -93,7 +93,12 @@ export default function AppShell({ variant, title, navigation }: Props) {
             <Outlet />
           </Suspense>
         </main>
-        <footer className="site-footer"><strong>UCEBUL · Foro técnico</strong><span>Educación y comunidad agropecuaria</span></footer>
+        <Footer>
+          <div className="site-footer">
+            <span>© {new Date().getFullYear()} UCEBUL · Foro Técnico · Todos los derechos reservados.</span>
+            <span>Educación y comunidad agropecuaria</span>
+          </div>
+        </Footer>
       </div>
     </div>
   )

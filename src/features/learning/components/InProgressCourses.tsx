@@ -2,13 +2,18 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Button, Card, CardBody, DataIcons, Empty, Spinner } from 'ucebul_mui'
 import { useRequest } from '../../../lib/useRequest'
 import { listAllMyCourses } from '../api/learning.service'
+import type { ForumEnrollment } from '../types/learning.types'
 import ContinueLearning from './ContinueLearning'
 import CourseProgress from './CourseProgress'
 
-// Cursos inscritos sin finalizar, para retomar desde el inicio.
-export default function InProgressCourses({ limit = 3 }: { limit?: number }) {
+type EnrollmentsRequest = ReturnType<typeof useRequest<ForumEnrollment[]>>
+
+// Cursos inscritos sin finalizar, para retomar desde el inicio. `enrollments` evita repetir la carga
+// cuando la página ya consultó /forum/my-courses.
+export default function InProgressCourses({ limit = 3, enrollments }: { limit?: number; enrollments?: EnrollmentsRequest }) {
   const navigate = useNavigate()
-  const request = useRequest('my-courses', listAllMyCourses)
+  const own = useRequest(enrollments ? null : 'my-courses', listAllMyCourses)
+  const request = enrollments ?? own
   const active = (request.data ?? []).filter((enrollment) => enrollment.course && !enrollment.progress.is_completed)
 
   if (request.loading) return <div className="loading-block"><Spinner label="Cargando tus cursos…" /></div>

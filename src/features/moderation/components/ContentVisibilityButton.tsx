@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Button, Dialog } from 'ucebul_mui'
+import { Button, DataIcons, Dialog } from 'ucebul_mui'
+import ButtonIcon from '../../../components/ButtonIcon'
 import { toApiError } from '../../../lib/api-error'
 import type { ForumPost, ForumTopic } from '../../community/types/community.types'
 import { hidePost, hideTopic, restorePost, restoreTopic } from '../api/moderation.service'
@@ -47,8 +48,9 @@ export default function ContentVisibilityButton(props: Props) {
 
   return (
     <>
-      <Button size={props.size ?? 'sm'} variant={props.hidden ? 'primary--outline' : 'danger--outline'} loading={busy} disabled={busy}
-        onClick={() => setConfirm(true)}>{props.hidden ? 'Restaurar' : 'Ocultar'}</Button>
+      <Button size={props.size ?? 'sm'} variant={props.hidden ? 'primary--outline' : 'default'} loading={busy} disabled={busy}
+        onClick={() => setConfirm(true)}><ButtonIcon icon={props.hidden ? DataIcons.global.eyeOutline : DataIcons.global.eyeSlash} />
+        {props.hidden ? 'Restaurar' : 'Ocultar'}</Button>
       {error && <p className="auth-error content-visibility-error" role="alert">{error}</p>}
       <Dialog open={confirm} typeDialog={props.hidden ? 'info' : 'warning'} titleDialog={title} textDialog={text}
         buttonCancelDialog="Cancelar" buttonConfirmDialog={props.hidden ? 'Restaurar' : 'Ocultar'}

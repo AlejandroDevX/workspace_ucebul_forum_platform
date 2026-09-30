@@ -6,7 +6,7 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   --forest: #124d43;
-  --ink: #203b37;
+  --app-ink: #203b37;
   --muted: #536a65;
   --line: #dce6e1;
   --mint: #dfefe7;
@@ -20,5 +20,5 @@ a:focus-visible, button:focus-visible { outline: 3px solid #977018; outline-offs
 h1, h2, h3, p { margin: 0; }
 button, input, textarea, select { font: inherit; }
 svg { width: 1.3em; height: 1.3em; }
-::selection { background: var(--ochre); color: var(--ink); }
+::selection { background: var(--ochre); color: var(--app-ink); }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; } }

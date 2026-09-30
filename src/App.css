@@ -20,16 +20,15 @@ h2 { font-size: 22px; letter-spacing: -.03em; font-weight: 600; }
 .text-link span { display: inline-flex; }
 .text-link:hover { text-decoration: underline; }
 
-/* ---------- Shell: Sidebar + Header de ucebul_mui ---------- */
-.app-shell { min-height: 100vh; display: flex; background: #f5f8f7; }
+/* ---------- Shell: Sidebar, Header y Footer de ucebul_mui ----------
+   Solo se ajusta la disposición: colores, tipografía y superficies vienen de ucebul_mui. */
+.app-shell { min-height: 100vh; display: flex; }
 .app-shell__body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.app-shell .header { position: sticky; top: 0; z-index: 20; min-height: 64px; background: #fff; border-bottom: 1px solid var(--line); gap: 16px; justify-content: space-between; }
-.app-shell .header__title { color: var(--forest); font-size: 18px; letter-spacing: -.02em; }
+.app-shell .header { position: sticky; top: 0; z-index: 20; }
 /* El foro no tiene notificaciones, perfil ni cambio de contraseña: se ocultan las acciones sin destino. */
 .app-shell .header__notifications,
 .app-shell .header__menu__list li:not(:last-child) { display: none; }
 .app-shell .header__menu__list li:last-child { margin-top: 0; padding-top: 0; border-top: 0; }
-.app-shell--admin .header__title::before { content: 'UCEBUL · '; color: var(--muted); font-weight: 600; }
 /* Nombres largos no deben desbordar la cabecera: el bloque de perfil puede encogerse y, en móvil,
    el nombre se oculta visualmente (font-size 0) pero sigue siendo el nombre accesible del botón. */
 .app-shell .header__actions { flex-shrink: 1; min-width: 0; }
@@ -38,19 +37,27 @@ h2 { font-size: 22px; letter-spacing: -.03em; font-weight: 600; }
   .app-shell .header__profile__name { font-size: 0; }
 }
 
-.app-shell main { flex: 1; width: 100%; max-width: 1120px; margin-inline: auto; padding: 36px clamp(16px, 4vw, 48px) 56px; }
-.site-footer { width: 100%; max-width: 1120px; margin-inline: auto; padding: 20px clamp(16px, 4vw, 48px); border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 8px 20px; flex-wrap: wrap; color: var(--muted); font-size: 12px; }
-.site-footer strong { font-weight: 600; }
+.app-shell main { flex: 1; width: 100%; max-width: 1360px; margin-inline: auto; padding: 24px clamp(16px, 3vw, 32px) 40px; }
+.app-shell .footer { height: auto; min-height: 56px; padding: 12px clamp(16px, 3vw, 32px); }
+.site-footer { width: 100%; max-width: 1296px; display: flex; justify-content: space-between; align-items: center; gap: 4px 20px; flex-wrap: wrap; font-size: 13px; }
+
+/* Sidebar oscuro: en escritorio ucebul_mui pinta la navegación con su tema claro aunque el panel sea `dark`;
+   se restauran sus propios tokens de navegación oscura para mantener el contraste. */
+.sidebar--dark .vertical-navigation--light {
+  --nav-text: white; --nav-icon: var(--green-tertiary); --nav-label: var(--ink-faint); --nav-hover-bg: var(--ink-elevated);
+  --nav-active-bg: var(--green-secondary); --nav-active-text: white;
+}
+@media (min-width: 992px) {
+  .app-shell .sidebar { position: sticky; top: 0; height: 100vh; flex-shrink: 0; }
+  /* Deja libre el botón de colapsar del Sidebar, que sobresale 20px sobre la cabecera. */
+  .app-shell .header { padding-left: 40px !important; }
+}
 
 .app-shell__toolbar { display: none; }
 .app-shell__current { display: none; font-weight: 600; color: var(--forest); }
 .quick-nav a { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 14px; font-weight: 600; border-radius: 8px; }
 .quick-nav a.active { color: var(--forest); background: var(--mint); }
 .quick-nav__icon { display: inline-flex; }
-
-@media (min-width: 992px) {
-  .app-shell .sidebar { position: sticky; top: 0; height: 100vh; flex-shrink: 0; }
-}
 
 /* Tablet: menú lateral en panel + accesos rápidos en fila desplazable. */
 @media (max-width: 991.98px) {
@@ -69,9 +76,9 @@ h2 { font-size: 22px; letter-spacing: -.03em; font-weight: 600; }
   .quick-nav a { flex: 1 1 0; min-width: 0; flex-direction: column; gap: 2px; padding: 6px 2px; min-height: 52px; justify-content: center; font-size: 11px; }
   .quick-nav__icon svg { width: 22px; height: 22px; }
   .quick-nav__label { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
-  .app-shell main { padding: 24px 16px 40px; }
+  .app-shell main { padding: 20px 16px 32px; }
   .app-shell__body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
-  .site-footer { flex-direction: column; flex-wrap: nowrap; }
+  .site-footer { flex-direction: column; justify-content: center; text-align: center; }
 }
 
 .global-error { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
@@ -84,14 +91,105 @@ h2 { font-size: 22px; letter-spacing: -.03em; font-weight: 600; }
 .availability-card { margin-top: 32px; }
 .availability-card .empty { border: 0; background: transparent; }
 
-.dashboard { display: grid; gap: 40px; }
-.dashboard-welcome { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 24px; padding: 32px; background: var(--mint); border-radius: 8px; }
-.dashboard-welcome__avatar { background: var(--forest); font-size: 24px; }
-.dashboard-welcome h1 { font-size: clamp(28px, 4vw, 40px); letter-spacing: -.04em; line-height: 1.15; }
-.dashboard-welcome__copy > p:not(.eyebrow) { margin-top: 10px; color: #3a5d51; line-height: 1.7; max-width: 560px; }
-.dashboard-welcome__role { align-self: start; }
-.dashboard-section h2 { margin-bottom: 16px; }
-.dashboard-section .empty { background: #fff; }
+/* ---------- Dashboard: colores tomados de los tokens de ucebul_mui ---------- */
+.dashboard { display: grid; gap: 20px; }
+.button-icon--end { margin: 0 0 0 8px; }
+
+.dashboard-hero { position: relative; display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr) minmax(0, .6fr); align-items: center; min-height: 230px; border-radius: 12px; overflow: hidden; background: linear-gradient(100deg, var(--green-surface) 0%, #fff 55%, var(--green-surface) 100%); border: 1px solid var(--border-color); }
+.dashboard-hero__copy { position: relative; z-index: 1; padding: 32px clamp(20px, 4vw, 56px); display: grid; gap: 10px; justify-items: start; }
+.dashboard-hero__eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--green-primary); }
+.dashboard-hero h1 { font-size: clamp(28px, 3.4vw, 40px); line-height: 1.1; letter-spacing: -.03em; color: var(--green-secondary); }
+.dashboard-hero__copy > p:not(.dashboard-hero__eyebrow) { color: var(--dark-tertiary); line-height: 1.6; max-width: 440px; margin-bottom: 8px; }
+.dashboard-hero__copy .btn { display: inline-flex; align-items: center; }
+.dashboard-hero__media { align-self: stretch; position: relative; clip-path: ellipse(54% 78% at 50% 50%); }
+.dashboard-hero__media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 30%; }
+.dashboard-hero__quote { margin: 0; padding: 24px clamp(16px, 2vw, 32px) 24px 16px; }
+.dashboard-hero__quote p { font-size: 18px; font-style: italic; line-height: 1.35; color: var(--green-secondary); }
+.dashboard-hero__quote::after { content: ''; display: block; width: 40px; height: 4px; margin-top: 16px; border-radius: 4px; background: var(--green-tertiary); }
+
+.stat-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.stat-grid > li { display: flex; }
+.stat-card { flex: 1; position: relative; transition: border-color .15s ease, box-shadow .15s ease; }
+.stat-card:hover { border-color: var(--green-primary-disabled); }
+.stat-card:focus-within { outline: 3px solid var(--green-primary); outline-offset: 2px; }
+.stat-card .ui-card__body { display: flex; align-items: center; gap: 16px; padding: 18px 20px; }
+.stat-card__icon { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 50%; background: var(--green-surface); color: var(--green-primary); }
+.stat-card__icon svg { width: 26px; height: 26px; stroke: currentColor; }
+.stat-card__text { flex: 1; min-width: 0; display: grid; gap: 2px; }
+/* El enlace cubre toda la tarjeta; su texto es el nombre accesible. */
+.stat-card__link { font-size: 14px; font-weight: 600; color: var(--dark-primary); }
+.stat-card__link::after { content: ''; position: absolute; inset: 0; }
+.stat-card__link:focus-visible { outline: none; }
+.stat-card__text strong { font-size: 26px; line-height: 1.2; color: var(--dark-primary); }
+.stat-card__text strong small { font-size: 14px; font-weight: 500; color: var(--dark-tertiary); }
+.stat-card__text > span { font-size: 13px; color: var(--dark-tertiary); }
+.stat-card__chevron { display: inline-flex; color: var(--dark-tertiary); }
+.stat-card__chevron svg { width: 18px; height: 18px; }
+
+.dashboard-card { height: 100%; }
+.dashboard-card .ui-card__header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px 0; border: 0; }
+.dashboard-card h2 { font-size: 18px; letter-spacing: -.01em; color: var(--dark-primary); }
+.dashboard-card .ui-card__body { padding: 16px 20px 20px; }
+.dashboard-card__action { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--green-primary); white-space: nowrap; }
+.dashboard-card__action span { display: inline-flex; }
+.dashboard-card__action svg { width: 16px; height: 16px; }
+.dashboard-card__action:hover { text-decoration: underline; }
+.dashboard-continue .empty { border: 0; padding-block: 8px; }
+.dashboard-continue .in-progress-list { margin-bottom: 0; }
+.dashboard-muted { color: var(--dark-tertiary); font-size: 14px; }
+
+.dashboard-columns { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: stretch; }
+
+.recommended-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+.recommended-course { display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden; background: #fff; }
+.recommended-course__cover { position: relative; }
+.recommended-course__cover .course-cover { aspect-ratio: 16 / 8; }
+.recommended-course__level { position: absolute; top: 8px; right: 8px; }
+.recommended-course__body { flex: 1; display: flex; flex-direction: column; gap: 6px; padding: 12px; }
+.recommended-course h3 { font-size: 15px; font-weight: 600; color: var(--dark-primary); }
+.recommended-course__body > p { font-size: 13px; line-height: 1.5; color: var(--dark-tertiary); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.recommended-course__meta { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0; font-size: 12px; color: var(--dark-tertiary); }
+.recommended-course__meta div { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.recommended-course__meta dt { display: inline-flex; }
+.recommended-course__meta dd { margin: 0; }
+.recommended-course__meta svg { width: 15px; height: 15px; }
+.recommended-course__action { margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px; border-radius: 8px; font-size: 13px; font-weight: 600; background: var(--green-surface); color: var(--green-secondary); }
+.recommended-course__action span { display: inline-flex; }
+.recommended-course__action svg { width: 16px; height: 16px; }
+.recommended-course__action:hover { background: var(--green-primary); color: #fff; }
+
+.activity-list { list-style: none; margin: 0; padding: 0; display: grid; }
+.activity-item { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 4px 14px; padding: 10px 0; border-bottom: 1px solid var(--border-color); }
+.activity-item:first-child { padding-top: 0; }
+.activity-item:last-child { border-bottom: 0; padding-bottom: 0; }
+.activity-item__icon { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: var(--status-info-bg); color: var(--status-info-text); }
+.activity-item__icon--solved { background: var(--status-success-bg); color: var(--status-success-text); }
+.activity-item__icon svg { width: 18px; height: 18px; stroke: currentColor; }
+.activity-item__main { display: grid; gap: 2px; min-width: 0; }
+.activity-item__main a { font-size: 14px; font-weight: 600; color: var(--dark-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.activity-item__main a:hover { color: var(--green-primary); text-decoration: underline; }
+.activity-item__main > span { font-size: 12px; color: var(--dark-tertiary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.activity-item__time { font-size: 12px; color: var(--dark-tertiary); white-space: nowrap; }
+.activity-item__replies { display: inline-flex; align-items: center; gap: 4px; min-width: 40px; justify-content: flex-end; font-size: 13px; color: var(--dark-primary); }
+.activity-item__replies svg { width: 16px; height: 16px; }
+
+@media (max-width: 1199.98px) {
+  .dashboard-hero { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); }
+  .dashboard-hero__quote { display: none; }
+  .dashboard-columns { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 991.98px) {
+  .stat-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+}
+@media (max-width: 767.98px) {
+  .dashboard { gap: 16px; }
+  .dashboard-hero { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+  .dashboard-hero__media { display: none; }
+  .dashboard-hero__copy { padding: 24px 20px; }
+  .activity-item { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .activity-item__time { grid-column: 2; grid-row: 2; }
+  .activity-item__replies { grid-column: 3; grid-row: 1 / span 2; }
+}
 
 .shortcut-grid { list-style: none; margin: 24px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
 .dashboard-section .shortcut-grid { margin-top: 0; }
@@ -103,9 +201,6 @@ h2 { font-size: 22px; letter-spacing: -.03em; font-weight: 600; }
 .shortcut-card .text-link { margin-top: auto; padding-top: 20px; }
 
 @media (max-width: 767.98px) {
-  .dashboard { gap: 32px; }
-  .dashboard-welcome { grid-template-columns: auto 1fr; padding: 24px 20px; gap: 16px; }
-  .dashboard-welcome__role { grid-column: 1 / -1; justify-self: start; }
   .shortcut-grid { grid-template-columns: 1fr; gap: 16px; }
   .global-error { align-items: flex-start; flex-direction: column; }
 }
@@ -207,7 +302,7 @@ h2 { font-size: 22px; letter-spacing: -.03em; font-weight: 600; }
 .course-detail__intro .detail-title-row { margin-top: -6px; }
 .course-detail__summary { font-size: 17px; line-height: 1.65; color: #3a5d51; margin-top: -6px; }
 /* Ficha: tres celdas de lectura rápida (etiqueta arriba, valor abajo). */
-.course-meta--detail { display: grid; grid-auto-flow: column; grid-auto-columns: auto; gap: 0; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink); }
+.course-meta--detail { display: grid; grid-auto-flow: column; grid-auto-columns: auto; gap: 0; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--app-ink); }
 .course-meta--detail > div { display: grid; gap: 4px; align-content: start; padding: 12px 14px; min-width: 0; }
 .course-meta--detail > div + div { border-left: 1px solid var(--line); }
 .course-meta--detail dt { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
@@ -219,7 +314,7 @@ h2 { font-size: 22px; letter-spacing: -.03em; font-weight: 600; }
 .course-forum-link__icon { width: 40px; height: 40px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--mint); color: var(--forest); }
 .course-forum-link__icon svg { width: 20px; height: 20px; }
 .course-forum-link__text { display: grid; gap: 2px; min-width: 0; }
-.course-forum-link__text strong { font-size: 15px; color: var(--ink); }
+.course-forum-link__text strong { font-size: 15px; color: var(--app-ink); }
 .course-forum-link__text small { font-size: 13px; color: var(--muted); line-height: 1.4; }
 .course-forum-link__arrow { display: inline-flex; color: var(--forest); transition: transform .16s ease; }
 .course-forum-link:hover .course-forum-link__arrow { transform: translateX(3px); }
@@ -488,7 +583,7 @@ h2 { font-size: 22px; letter-spacing: -.03em; font-weight: 600; }
 .topic-card:hover { border-color: #b9cfc6; }
 .topic-card .ui-card__body { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 18px; padding: 18px 20px; }
 .topic-card__stats { display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; background: #f5f8f7; padding: 10px 4px; color: var(--muted); font-size: 11px; text-align: center; align-self: start; }
-.topic-card__stats strong { font-size: 20px; color: var(--ink); }
+.topic-card__stats strong { font-size: 20px; color: var(--app-ink); }
 .topic-card--solved .topic-card__stats { background: var(--mint); color: var(--forest); }
 .topic-card--solved .topic-card__stats strong { color: var(--forest); }
 .topic-card__main { display: grid; gap: 8px; min-width: 0; }
@@ -497,65 +592,101 @@ h2 { font-size: 22px; letter-spacing: -.03em; font-weight: 600; }
 .topic-card__excerpt { color: var(--muted); font-size: 14px; line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .topic-card__meta { font-size: 12px; color: var(--muted); }
 
-/* Pregunta: bloque principal con acento en el borde. */
-.topic-page { display: grid; gap: 28px; max-width: 860px; }
-.topic-page > .back-link { margin-bottom: -8px; }
-.topic-question__card { border-left: 4px solid var(--forest); }
-.topic-question__card .ui-card__body { display: grid; gap: 12px; padding: 28px; }
-.topic-question__label { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--forest); }
-.topic-question h1 { font-size: clamp(24px, 3.4vw, 34px); letter-spacing: -.03em; line-height: 1.2; overflow-wrap: anywhere; }
-.topic-question__meta { font-size: 13px; color: var(--muted); }
-.topic-question__body { white-space: pre-line; line-height: 1.75; font-size: 16px; overflow-wrap: anywhere; }
-.topic-question__actions { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 12px; border-top: 1px solid var(--line); }
-.topic-question__course:hover .ui-badge { border-color: var(--forest); }
+/* Pregunta: solo layout; colores, bordes y botones vienen de los tokens y componentes de ucebul_mui. */
+.topic-page { display: grid; gap: 24px; max-width: 1160px; }
+.topic-page__nav { display: grid; justify-items: start; gap: 14px; }
+.topic-page__nav .back-link { margin-bottom: 0; font-size: 16px; color: var(--green-secondary); }
+.topic-page__category .ui-badge { gap: 2px; min-height: 34px; padding: 6px 16px; border-radius: 999px; border-color: transparent; background: var(--green-surface); color: var(--green-secondary); font-size: 14px; font-weight: 500; }
+.topic-page__category:hover .ui-badge { border-color: var(--green-primary); }
+
+.topic-question__card .ui-card__body, .post-card .ui-card__body, .topic-reply .ui-card__body, .accepted-answer__card .ui-card__body { display: grid; gap: 16px; padding: 28px; }
+.topic-question__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.topic-question__label { border-color: transparent; background: var(--status-success-bg); color: var(--status-success-text); font-size: 11px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; }
+.topic-question h1 { margin-top: -8px; color: var(--dark-primary); font-size: clamp(26px, 3.4vw, 38px); font-weight: 800; letter-spacing: -.02em; line-height: 1.2; overflow-wrap: anywhere; }
+.topic-question__body { white-space: pre-line; line-height: 1.7; font-size: 18px; color: var(--dark-primary); overflow-wrap: anywhere; }
+.topic-question__divider, .post-card__divider { margin: 0; }
+.topic-question__actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.topic-question__actions:empty, .topic-question__divider:has(+ .topic-question__actions:empty) { display: none; }
+.topic-question__course:hover .ui-badge { border-color: var(--green-primary); }
+.topic-question__actions .btn, .post-card__actions .btn, .reaction-button { display: inline-flex; align-items: center; }
+
+.author-line { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; min-width: 0; }
+.author-line .avatar { flex-shrink: 0; background: var(--green-secondary); font-weight: 600; font-size: 18px; }
+.author-line__text { display: flex; align-items: center; gap: 12px; min-width: 0; color: var(--dark-primary); }
+.author-line__date { color: var(--dark-tertiary); font-size: 15px; }
+.author-line--inline .author-line__date::before { content: '·'; margin-right: 12px; color: var(--dark-secondary); }
+.author-line--stacked .author-line__text { flex-direction: column; align-items: flex-start; gap: 2px; }
+.author-line--stacked .author-line__date { font-size: 14px; }
 
 /* Solución aceptada: verde y destacada sobre el hilo. */
-.accepted-answer h2 { display: flex; align-items: center; gap: 8px; font-size: 18px; color: var(--forest); margin-bottom: 10px; }
+.accepted-answer h2 { display: flex; align-items: center; gap: 8px; font-size: 22px; color: var(--green-primary); margin-bottom: 14px; }
 .accepted-answer h2 span { display: inline-flex; }
-.accepted-answer__card { background: #f1f8f3; border-color: #9cc5a8; }
-.accepted-answer__card .ui-card__body { display: grid; gap: 10px; padding: 20px 24px; }
-.accepted-answer__card .text-link { margin-top: 0; }
+.accepted-answer__card { background: var(--green-surface); border-color: var(--green-primary-disabled); }
+.accepted-answer__card .text-link { margin-top: 0; color: var(--green-primary); }
 
-.topic-answers h2, .topic-reply h2 { font-size: 18px; margin-bottom: 14px; }
+.topic-answers h2 { font-size: 24px; color: var(--dark-primary); margin-bottom: 16px; }
 .topic-answers__empty { padding: 12px 0; }
 .load-more { display: flex; justify-content: center; margin-top: 16px; }
 .post-thread, .post-replies { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
-.post-replies { margin-top: 12px; padding-left: 24px; border-left: 2px solid var(--line); }
+.post-replies { margin-top: 12px; padding-left: 24px; border-left: 2px solid var(--border-color); }
 /* Desde el tercer nivel no se indenta más. */
 .post-item--depth-2 > .post-replies { padding-left: 0; border-left: 0; }
-.post-card .ui-card__body { display: grid; gap: 12px; padding: 18px 20px; }
-.post-card--mine { border-color: #cfdcd6; }
-.post-card--accepted { border: 2px solid #5c9b6e; background: #f7fbf8; }
-.post-card__header { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 13px; color: var(--muted); }
-.post-card__author { font-weight: 600; color: var(--ink); }
-.post-card__body { white-space: pre-line; line-height: 1.7; overflow-wrap: anywhere; }
-.post-card__footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
-.post-card__actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.post-card .ui-card__body { padding: 20px 28px; }
+.post-card { overflow: visible; }
+.post-card--accepted { border-color: var(--green-primary); }
+.post-card__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.post-card__menu { display: inline-flex; padding: 4px 8px; border-radius: 6px; color: var(--dark-tertiary); font-size: 14px; letter-spacing: .1em; }
+.ui-dropdown-menu__trigger:hover .post-card__menu { background: var(--light); }
+.post-card__body { white-space: pre-line; line-height: 1.7; font-size: 18px; color: var(--dark-primary); overflow-wrap: anywhere; }
+.post-card__footer { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.post-card__footer-divider { margin: 4px 16px 4px 8px; }
+.post-card__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-left: auto; }
+.post-card__accept, .reaction-button.is-active { background: var(--green-surface); }
 .post-replies-toggle { margin-top: 8px; }
 
-.reaction-buttons { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.reaction-button { display: inline-flex; align-items: center; gap: 6px; min-width: 56px; }
-.reaction-button svg { width: 16px; height: 16px; }
+.reaction-buttons { display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.reaction-button { gap: 14px; min-width: 76px; }
+.reaction-button svg { width: 20px; height: 20px; }
 .reaction-button--upvote svg { transform: rotate(180deg); }
-.reaction-buttons__error { font-size: 12px; color: #823725; }
+.reaction-buttons__error { font-size: 12px; color: var(--status-danger-text); }
+
+/* Responder: formulario a la izquierda y consejos a la derecha. */
+.topic-reply__layout.ui-card__body { grid-template-columns: minmax(0, 1fr) auto minmax(240px, 340px); gap: 0; }
+.topic-reply__divider { margin: 0 28px; }
+.topic-reply h2 { font-size: 22px; color: var(--dark-primary); margin-bottom: 14px; }
+.topic-reply__tips { align-self: start; padding: 24px 20px; border-radius: 8px; background: var(--green-surface); }
+.topic-reply__tips h3 { display: flex; align-items: center; gap: 12px; margin: 0 0 18px; font-size: 15px; color: var(--green-secondary); }
+.topic-reply__tips h3 span { display: inline-flex; color: var(--green-primary); }
+.topic-reply__tips ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
+.topic-reply__tips li { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--dark-tertiary); line-height: 1.4; }
+.topic-reply__tips li span { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: var(--green-primary); color: #fff; }
+.topic-reply__tips li svg { width: 14px; height: 14px; }
 
 .reply-form { display: grid; gap: 10px; }
 .reply-form fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
-.reply-form textarea { width: 100%; min-height: 110px; resize: vertical; }
+.reply-form label { color: var(--green-secondary); font-weight: 600; }
+.reply-form textarea { width: 100%; min-height: 96px; resize: vertical; }
+.reply-form__hint { display: flex; justify-content: space-between; gap: 12px; margin-top: 8px; font-size: 13px; color: var(--dark-tertiary); }
+.reply-form__hint > span:first-child { display: inline-flex; align-items: center; gap: 8px; }
+.reply-form__hint svg { width: 16px; height: 16px; }
+.reply-form__count { margin-left: auto; white-space: nowrap; }
 .reply-form__actions { display: flex; flex-wrap: wrap; gap: 8px; }
-.post-card .reply-form { padding-top: 12px; border-top: 1px dashed var(--line); }
+.reply-form__actions .btn { display: inline-flex; align-items: center; }
+.post-card .reply-form { padding-top: 12px; border-top: 1px dashed var(--border-color); }
 .topic-body-input textarea, textarea.topic-body-input { min-height: 220px; }
 
 @media (max-width: 767.98px) {
   .topic-card .ui-card__body { grid-template-columns: 1fr; gap: 10px; padding: 16px; }
   .topic-card__stats { flex-direction: row; gap: 6px; justify-self: start; padding: 4px 10px; }
   .topic-card__stats strong { font-size: 14px; }
-  .topic-question__card .ui-card__body { padding: 20px 16px; }
+  .topic-question__card .ui-card__body, .post-card .ui-card__body, .topic-reply .ui-card__body, .accepted-answer__card .ui-card__body { padding: 20px 16px; }
+  .topic-reply__layout.ui-card__body { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .topic-reply__divider, .post-card__footer-divider { display: none; }
+  .post-card__actions { justify-content: flex-start; margin-left: 0; }
+  .topic-question__body, .post-card__body { font-size: 16px; }
   /* En móvil solo el primer nivel marca la jerarquía, sin sangría acumulada. */
   .post-replies { padding-left: 12px; }
   .post-item--depth-1 > .post-replies, .post-item--depth-2 > .post-replies { padding-left: 0; border-left: 0; }
-  .post-card .ui-card__body { padding: 14px 16px; }
-  .post-card__footer { flex-direction: column; align-items: flex-start; }
 }
 
 /* ---------- Tablas de administración (Table de ucebul_mui) ---------- */
@@ -599,7 +730,6 @@ h2 { font-size: 22px; letter-spacing: -.03em; font-weight: 600; }
 .report-modal { width: min(560px, calc(100% - 24px)); }
 .report-form .muted { font-size: 14px; line-height: 1.6; }
 .content-visibility-error { flex-basis: 100%; }
-.topic-question__actions:empty { display: none; }
 .shortcut-card__stat { margin-top: 12px; }
 
 @media (max-width: 899.98px) {
