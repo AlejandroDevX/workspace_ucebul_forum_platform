@@ -1,22 +1,10 @@
+import { lazy } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { ADMIN_PERMISSIONS, PERMISSIONS } from './app/navigation'
 import AuthLayout from './layouts/AuthLayout'
 import ForumLayout from './layouts/ForumLayout'
 import AdminLayout from './layouts/AdminLayout'
-import CoursesPage from './features/courses/pages/CoursesPage'
-import AdminCoursesPage from './features/courses/pages/AdminCoursesPage'
-import CourseCategoriesPage from './features/courses/pages/CourseCategoriesPage'
-import CourseDetailPage from './features/courses/pages/CourseDetailPage'
-import CourseFormPage from './features/courses/pages/CourseFormPage'
-import LessonDetailPage from './features/lessons/pages/LessonDetailPage'
-import LessonFormPage from './features/lessons/pages/LessonFormPage'
-import CommunityPage from './features/community/pages/CommunityPage'
-import LearningPage from './features/learning/pages/LearningPage'
-import MyCoursesPage from './features/learning/pages/MyCoursesPage'
-import FavoritesPage from './features/favorites/pages/FavoritesPage'
-import ModerationPage from './features/moderation/pages/ModerationPage'
 import DashboardPage from './pages/DashboardPage'
-import AdminDashboardPage from './pages/AdminDashboardPage'
 import NotFoundPage from './pages/NotFoundPage'
 import UnauthorizedPage from './pages/UnauthorizedPage'
 import LoginPage from './features/auth/pages/LoginPage'
@@ -24,9 +12,33 @@ import SessionBoundary from './features/auth/components/SessionBoundary'
 import PublicRoute from './routes/PublicRoute'
 import PrivateRoute from './routes/PrivateRoute'
 import PermissionRoute from './routes/PermissionRoute'
+import { useKeyboardSupport } from './lib/useKeyboardSupport'
 import './App.css'
 
+// Cada sección se descarga al visitarla; AppShell muestra un indicador mientras llega su código.
+const CoursesPage = lazy(() => import('./features/courses/pages/CoursesPage'))
+const AdminCoursesPage = lazy(() => import('./features/courses/pages/AdminCoursesPage'))
+const AdminCategoriesPage = lazy(() => import('./features/courses/pages/AdminCategoriesPage'))
+const CourseDetailPage = lazy(() => import('./features/courses/pages/CourseDetailPage'))
+const CourseFormPage = lazy(() => import('./features/courses/pages/CourseFormPage'))
+const LessonDetailPage = lazy(() => import('./features/lessons/pages/LessonDetailPage'))
+const LessonFormPage = lazy(() => import('./features/lessons/pages/LessonFormPage'))
+const AdminLessonsPage = lazy(() => import('./features/lessons/pages/AdminLessonsPage'))
+const ForumHomePage = lazy(() => import('./features/community/pages/ForumHomePage'))
+const ForumCategoryPage = lazy(() => import('./features/community/pages/ForumCategoryPage'))
+const ForumCategoriesPage = lazy(() => import('./features/community/pages/ForumCategoriesPage'))
+const TopicDetailPage = lazy(() => import('./features/community/pages/TopicDetailPage'))
+const TopicFormPage = lazy(() => import('./features/community/pages/TopicFormPage'))
+const TopicSearchPage = lazy(() => import('./features/community/pages/TopicSearchPage'))
+const LearningPage = lazy(() => import('./features/learning/pages/LearningPage'))
+const MyCoursesPage = lazy(() => import('./features/learning/pages/MyCoursesPage'))
+const FavoritesPage = lazy(() => import('./features/favorites/pages/FavoritesPage'))
+const ModerationPage = lazy(() => import('./features/moderation/pages/ModerationPage'))
+const ReportDetailPage = lazy(() => import('./features/moderation/pages/ReportDetailPage'))
+const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage'))
+
 export default function App() {
+  useKeyboardSupport()
   return (
     <BrowserRouter><SessionBoundary><Routes>
       <Route element={<AuthLayout />}>
@@ -49,9 +61,20 @@ export default function App() {
             <Route path="courses/:courseId/learn" element={<LearningPage />} />
           </Route>
           <Route element={<PermissionRoute permissions={[PERMISSIONS.communityView]} />}>
-            <Route path="forum" element={<CommunityPage />} />
+            <Route path="forum" element={<ForumHomePage />} />
+            <Route path="forum/search" element={<TopicSearchPage />} />
+            <Route path="forum/categories/:categoryId" element={<ForumCategoryPage />} />
+            <Route path="forum/topics/:topicId" element={<TopicDetailPage />} />
+            <Route element={<PermissionRoute permissions={[PERMISSIONS.communityCreate]} />}>
+              <Route path="forum/new" element={<TopicFormPage />} />
+            </Route>
+            <Route element={<PermissionRoute permissions={[PERMISSIONS.communityUpdate]} />}>
+              <Route path="forum/topics/:topicId/edit" element={<TopicFormPage />} />
+            </Route>
           </Route>
-          <Route path="favorites" element={<FavoritesPage />} />
+          <Route element={<PermissionRoute permissions={[PERMISSIONS.coursesView, PERMISSIONS.communityView]} mode="any" />}>
+            <Route path="favorites" element={<FavoritesPage />} />
+          </Route>
           <Route path="*" element={<NotFoundPage />} />
         </Route>
         <Route path="admin" element={<PermissionRoute permissions={ADMIN_PERMISSIONS} mode="any" />}>
@@ -66,6 +89,9 @@ export default function App() {
             <Route element={<PermissionRoute permissions={[PERMISSIONS.courseUpdate]} />}>
               <Route path="courses/:courseId/edit" element={<CourseFormPage />} />
             </Route>
+            <Route element={<PermissionRoute permissions={[PERMISSIONS.lessonsView]} />}>
+              <Route path="courses/:courseId/lessons" element={<AdminLessonsPage />} />
+            </Route>
             <Route element={<PermissionRoute permissions={[PERMISSIONS.lessonsCreate]} />}>
               <Route path="courses/:courseId/lessons/new" element={<LessonFormPage />} />
             </Route>
@@ -73,10 +99,14 @@ export default function App() {
               <Route path="courses/:courseId/lessons/:lessonId/edit" element={<LessonFormPage />} />
             </Route>
             <Route element={<PermissionRoute permissions={PERMISSIONS.adminCategories} mode="any" />}>
-              <Route path="categories" element={<CourseCategoriesPage />} />
+              <Route path="categories" element={<AdminCategoriesPage />} />
             </Route>
-            <Route element={<PermissionRoute permissions={PERMISSIONS.adminModeration} mode="any" />}>
+            <Route element={<PermissionRoute permissions={[PERMISSIONS.communityManageAny]} />}>
+              <Route path="forum-categories" element={<ForumCategoriesPage />} />
+            </Route>
+            <Route element={<PermissionRoute permissions={[PERMISSIONS.moderationView]} />}>
               <Route path="moderation" element={<ModerationPage />} />
+              <Route path="moderation/reports/:reportId" element={<ReportDetailPage />} />
             </Route>
             <Route path="*" element={<NotFoundPage />} />
           </Route>

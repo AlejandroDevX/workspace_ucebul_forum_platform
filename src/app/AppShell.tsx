@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { Button, DataIcons, Header, IconButton, Sidebar } from 'ucebul_mui'
+import { Button, DataIcons, Header, IconButton, Sidebar, Spinner } from 'ucebul_mui'
 import { useAuthStore } from '../features/auth/store/auth.store'
 import { permissionSlugs } from '../features/auth/utils/session-policy'
 import { type NavGroup, type NavItem, visibleGroups } from './navigation'
@@ -89,7 +89,9 @@ export default function AppShell({ variant, title, navigation }: Props) {
         <main id="contenido" ref={main} tabIndex={-1}>
           {error && <div className="auth-error global-error" role="alert"><p>{error.message}</p>
             <Button size="sm" onClick={() => clearError()}>Cerrar aviso</Button></div>}
-          <Outlet />
+          <Suspense fallback={<div className="loading-block"><Spinner label="Cargando sección…" /></div>}>
+            <Outlet />
+          </Suspense>
         </main>
         <footer className="site-footer"><strong>UCEBUL · Foro técnico</strong><span>Educación y comunidad agropecuaria</span></footer>
       </div>

@@ -6,6 +6,9 @@ const text = (value: unknown) => (typeof value === 'string' || typeof value === 
 export const required = (message = 'Este campo es obligatorio.'): FieldValidator =>
   (value) => (text(value).trim() ? null : message)
 
+export const minLength = (length: number, message = `Mínimo ${length} caracteres.`): FieldValidator =>
+  (value) => (text(value).trim() && text(value).trim().length < length ? message : null)
+
 export const maxLength = (length: number, message = `Máximo ${length} caracteres.`): FieldValidator =>
   (value) => (text(value).length > length ? message : null)
 

@@ -5,14 +5,20 @@ import { categoryName, formatDuration } from '../utils/course-format'
 import { instructorLabel } from '../utils/useCoursePermissions'
 import CourseCover from './CourseCover'
 import CourseStatusBadge from './CourseStatusBadge'
+import FavoriteButton from '../../favorites/components/FavoriteButton'
 
-export default function CourseCard({ course, userId }: { course: ForumCourse; userId?: number | string }) {
+export default function CourseCard({ course, userId, onFavoriteChange }: {
+  course: ForumCourse
+  userId?: number | string
+  onFavoriteChange?: (favorite: boolean) => void
+}) {
   const category = categoryName(course)
   const description = course.forum_course_summary || course.forum_course_description
 
   return (
     <Card className="course-card">
       <CourseCover course={course} />
+      <FavoriteButton kind="course" id={course.forum_course_id} title={course.forum_course_title} onChange={onFavoriteChange} className="card-favorite" />
       <CardBody>
         <div className="course-card__tags">
           {category && <Badge variant="info">{category}</Badge>}

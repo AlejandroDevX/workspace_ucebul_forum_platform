@@ -11,14 +11,21 @@ export const PERMISSIONS = {
   lessonsUpdate: 'forum.lessons.update',
   learningView: 'forum.learning.view',
   communityView: 'forum.community.view',
+  communityCreate: 'forum.community.create',
+  communityUpdate: 'forum.community.update',
+  communityManageAny: 'forum.community.manage-any',
   adminCourses: ['forum.courses.create', 'forum.courses.update', 'forum.courses.delete', 'forum.courses.publish'],
   adminCategories: ['forum.courses.create', 'forum.courses.update'],
-  adminLessons: ['forum.lessons.create', 'forum.lessons.update'],
-  adminModeration: ['forum.moderation.view', 'forum.moderation.manage', 'forum.moderation.reports'],
+  adminLessons: ['forum.lessons.create', 'forum.lessons.update', 'forum.lessons.delete', 'forum.lessons.publish'],
+  moderationView: 'forum.moderation.view',
+  moderationManage: 'forum.moderation.manage',
+  moderationReports: 'forum.moderation.reports',
+  // Listar y consultar reportes exige forum.moderation.view; manage o reports por sí solos no dan acceso al panel.
+  adminModeration: ['forum.moderation.view'],
 } as const
 
 export const ADMIN_PERMISSIONS: readonly string[] = [
-  ...new Set([...PERMISSIONS.adminCourses, ...PERMISSIONS.adminCategories, ...PERMISSIONS.adminLessons, ...PERMISSIONS.adminModeration]),
+  ...new Set([...PERMISSIONS.adminCourses, ...PERMISSIONS.adminCategories, ...PERMISSIONS.adminLessons, ...PERMISSIONS.adminModeration, PERMISSIONS.communityManageAny]),
 ]
 
 export interface NavItem {
@@ -49,7 +56,7 @@ export const FORUM_NAVIGATION: NavGroup[] = [
     title: 'Comunidad',
     items: [
       { to: '/forum', title: 'Foro', icon: DataIcons.navigation.chats, permissions: [PERMISSIONS.communityView] },
-      { to: '/favorites', title: 'Favoritos', icon: DataIcons.global.bookmarkOutline },
+      { to: '/favorites', title: 'Favoritos', icon: DataIcons.global.bookmarkOutline, permissions: [PERMISSIONS.coursesView, PERMISSIONS.communityView] },
     ],
   },
   {
@@ -67,6 +74,7 @@ export const ADMIN_NAVIGATION: NavGroup[] = [
       { to: '/admin', title: 'Panel', icon: DataIcons.navigation.clipboardDocumentList, permissions: ADMIN_PERMISSIONS },
       { to: '/admin/courses', title: 'Cursos', icon: DataIcons.navigation.folder, permissions: PERMISSIONS.adminCourses },
       { to: '/admin/categories', title: 'Categorías', icon: DataIcons.navigation.tableOutline, permissions: PERMISSIONS.adminCategories },
+      { to: '/admin/forum-categories', title: 'Categorías del foro', icon: DataIcons.navigation.chats, permissions: [PERMISSIONS.communityManageAny] },
       { to: '/admin/moderation', title: 'Moderación', icon: DataIcons.navigation.documentCheck, permissions: PERMISSIONS.adminModeration },
     ],
   },

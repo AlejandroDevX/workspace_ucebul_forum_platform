@@ -1,4 +1,5 @@
 import { useCallback } from 'react'
+import { workspaceUserName } from '../../../lib/workspace-user'
 import { useAuthStore } from '../../auth/store/auth.store'
 import type { ForumCourse } from '../types/course.types'
 
@@ -22,7 +23,7 @@ export function useCoursePermissions() {
 }
 
 export function instructorLabel(course: ForumCourse, userId: number | string | undefined) {
-  return userId != null && String(course.forum_course_instructor_workspace_user_id) === String(userId)
-    ? 'Tú'
-    : `Instructor #${course.forum_course_instructor_workspace_user_id}`
+  if (userId != null && String(course.forum_course_instructor_workspace_user_id) === String(userId)) return 'Tú'
+  return workspaceUserName(course.forum_course_instructor_workspace_user)
+    ?? `Instructor #${course.forum_course_instructor_workspace_user_id}`
 }

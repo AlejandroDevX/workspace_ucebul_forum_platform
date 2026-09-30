@@ -259,7 +259,7 @@ Crear o actualizar AGENTS.md con estas reglas.
 - Consultar GET /auth/me con application_slug = ucebul-forum antes de autorizar el foro.
 - Sesión: workspace_user_id, workspace_user_email, workspace_user_name, workspace_user_last_name, current_application, current_application_access y current_application_permissions.
 - Exigir acceso activo; un token válido por sí solo no autoriza el foro.
-- Pendiente de confirmación: estructura y valor activo/inactivo de current_application_access. No inventarlos ni considerar cualquier objeto como acceso activo.
+- current_application_access autoriza solo con workspace_user_application_is_active === true (session-policy.ts). No considerar cualquier objeto como acceso activo.
 - Extraer workspace_application_permission_slug de los permisos agrupados por módulo. No inventar slugs de permisos para páginas.
 - Persistir token con clave ucebul.forum.access-token; Zustand mantiene la sesión. Deduplicar bootstrap y descartar respuestas obsoletas.
 - Ambas API envían Bearer. 401 invalida; 403 conserva token y muestra denegación; 503 conserva token y muestra indisponibilidad temporal.
@@ -303,3 +303,52 @@ Crear o actualizar AGENTS.md con estas reglas.
 - La UI solo refleja resúmenes devueltos por la API (enroll, progress, complete). El porcentaje lo calcula Laravel y solo se redondea para mostrarlo (puede traer decimales de coma flotante).
 - Posición del video: createPositionSaver aplica throttling (máx. una petición cada 15 s y solo si avanzó 5 s o más), nunca dos peticiones simultáneas, y guarda siempre al pausar, terminar, ocultar la pestaña o salir de la lección. Solo se sigue el primer video de la lección.
 - Solo se registra avance en lecciones publicadas de cursos publicados donde el usuario está inscrito.
+
+## COMUNIDAD — TAREA 06
+
+- Rutas: /forum (ForumHomePage), /forum/categories/:categoryId, /forum/topics/:topicId, /forum/new (?category=&course=), /forum/topics/:topicId/edit y /admin/forum-categories.
+- Filtros de temas en la URL: page, status (open/closed) y course. GET /forum/topics no tiene búsqueda de texto.
+- No existe GET de una categoría: se busca en el listado completo. Solo se listan categorías activas, salvo con forum.community.manage-any.
+- Crear o editar categorías del foro exige forum.community.manage-any además de create/update. Sin categorías activas nadie puede crear temas.
+- GET /forum/topics/{id} no trae respuestas: raíz con GET /topics/{id}/posts y las hijas con forum_post_parent_id (se cargan al pedir "Ver respuestas"). Desde el tercer nivel no se indenta.
+- user_reaction es un objeto ForumReaction o null. POST/DELETE de reacción no devuelven conteos: se derivan del estado previo y de la reacción confirmada (applyReaction).
+- Editar un tema envía solo los campos modificados (PUT parcial; categoría activa y curso visible solo se validan si se envían).
+- Autores: solo existe forum_*_workspace_user_id. Se muestra "Tú" o "Usuario #ID"; no hay endpoint público de usuarios.
+
+## ADMINISTRACIÓN Y MODERACIÓN — TAREA 07
+
+- Rutas: /admin (AdminDashboardPage), /admin/courses (AdminCoursesPage), /admin/categories (AdminCategoriesPage), /admin/courses/:courseId/lessons (AdminLessonsPage), /admin/moderation (ModerationPage, filtros status/topic/post en la URL) y /admin/moderation/reports/:reportId (ReportDetailPage).
+- Endpoints: POST/GET /forum/reports, GET /forum/reports/{id}, POST /forum/reports/{id}/resolve|dismiss, POST /forum/topics/{id}/hide|restore y POST /forum/posts/{id}/hide|restore. Servicios en features/moderation/api; cursos y lecciones reutilizan sus servicios existentes.
+- Permisos por endpoint: reportar = forum.moderation.reports; listar y consultar = forum.moderation.view; resolver, descartar, ocultar y restaurar = forum.moderation.manage (no exige autoría ni manage-any). Las rutas de moderación exigen forum.moderation.view; manage o reports solos no abren el panel. Nunca deducir permisos del rol.
+- POST /forum/reports: exactamente uno de forum_report_topic_id / forum_report_post_id, forum_report_reason (máx. 255) y forum_report_description opcional. Enviar autor, estado o datos de resolución responde 422 (incluso null).
+- Resolver y descartar: solo desde pending y SIN cuerpo; no existe nota de resolución. Resolver no oculta el contenido: el formulario de resolución llama a hide antes de resolve si se marca «Ocultar».
+- Transiciones: tema open/closed → hidden y hidden → open (restaurar reabre); respuesta published ↔ hidden. Los eliminados no se restauran. Confirmar siempre con Dialog antes de ocultar, restaurar, resolver o descartar.
+- Los resúmenes topic/post del reporte incluyen eliminados lógicamente. Para el contexto se usa GET /forum/topics/{id}; un tema oculto responde 404 sin forum.community.manage-any.
+- Table de ucebul_mui siempre renderiza su Pagination y no tiene estado vacío: usar Empty cuando no hay filas y pasar filas ya renderizadas (Record<string, ReactNode>).
+- Modal de ucebul_mui: sus `buttons` quedan fuera del contenido; los formularios dentro de Modal llevan sus propios Button de envío.
+
+## BÚSQUEDA Y FAVORITOS — TAREA 08
+
+- Rutas: /courses (catálogo con SearchFilters), /forum/search (TopicSearchPage) y /favorites (FavoritesPage, pestañas ?tab=courses|topics y ?page=).
+- Componentes compartidos: src/components/SearchInput (Field input, debounce 400 ms, máx. 100 caracteres) y SearchFilters (texto + Field select que se aplican al elegir; Enter aplica sin esperar). Los filtros viven en la URL; el texto usa replace para no llenar el historial.
+- La cancelación de búsquedas obsoletas la hace useRequest: cada cambio de filtros cambia la clave y aborta la solicitud anterior.
+- GET /forum/search/topics no filtra por estado; GET /forum/search/courses admite search, categoría y nivel. search vacío se omite.
+- Favoritos: POST/DELETE usan el ID del destino (curso o tema), sin cuerpo. POST devuelve 201 o 200 si ya existía. DELETE devuelve 200 con data null; 404 = el favorito no existía y se trata como retirado.
+- No hay endpoint «¿es favorito?» ni campo en cursos/temas: favorites.store (Zustand) carga todos los IDs (per_page 100) una vez por sesión, solo refleja cambios confirmados por la API y se reinicia al cambiar token o usuario.
+- Permisos: favoritos de cursos = forum.courses.view; de temas = forum.community.view. FavoriteButton se oculta sin el permiso.
+- Los temas de GET /forum/favorites/topics no traen forum_topic_posts_count: TopicCard oculta el conteo si falta.
+- No escribir onChange?.(await fn()): con onChange indefinido el argumento no se evalúa y fn nunca se ejecuta.
+
+## AUDITORÍA FINAL — TAREA 09
+
+- useKeyboardSupport (src/lib) completa el teclado de ucebul_mui sobre su marcado: opciones de Select y pestañas de Tabs con foco, roles ARIA, Enter/Espacio y flechas; Dialog/Modal enfocan Cancelar/Cerrar y cierran con Escape. No crear controles paralelos para esto.
+- Probar el diseño a 320 px: el nombre del perfil de Header se oculta visualmente en móvil y las tablas llevan sus .sr-only dentro del contenedor con scroll.
+- .env.example usa la API del foro en :8002.
+
+## PENDIENTES RESUELTOS — NOMBRES, NOTA, BUNDLE E IMÁGENES
+
+- Nombres: Workspace expone GET /api/workspace-user-summaries?application_slug=&workspace_user_ids[] (auth:sanctum; exige acceso activo a la aplicación; solo usuarios vinculados a ella; máx. 100 IDs; solo ID, nombre y apellido). La API del foro añade *_workspace_user junto a los IDs mostrados (middleware workspace.users). Nunca guardar nombres en tablas del foro. Mostrar con authorLabel/instructorLabel (Tú › nombre › «Usuario #ID»).
+- Reportes: resolve/dismiss aceptan forum_report_resolution_note (opcional, máx. 2000, vacía = null); ForumReportResource la devuelve.
+- Páginas con React.lazy y Suspense dentro de AppShell. vite.config.ts elimina el WASM de ONNX no referenciado.
+- Portadas y visor de imágenes usan Image de ucebul_mui; el CSS actúa sobre .image-container y respeta su estado --loading.
+- Workspace no define forum.community.manage-any ni forum.courses.manage-any: nadie puede crear categorías del foro (pendiente de decisión).

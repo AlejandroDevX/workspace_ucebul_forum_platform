@@ -1,12 +1,9 @@
-import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Badge, Button, DataIcons, Dialog, IconButton } from 'ucebul_mui'
-import { toApiError } from '../../../lib/api-error'
 import { formatDuration } from '../../courses/utils/course-format'
 import CompletedLessonIndicator from '../../learning/components/CompletedLessonIndicator'
-import { deleteLesson, publishLesson, reorderLessons } from '../api/lesson.service'
 import type { ForumLesson } from '../types/lesson.types'
-import { moveLesson, sortLessons } from '../utils/lesson-payload'
+import { useLessonActions } from '../utils/useLessonActions'
 
 interface Permissions {
   canUpdate: boolean
@@ -29,57 +26,8 @@ const NONE: Permissions = { canUpdate: false, canDelete: false, canPublish: fals
 
 export default function LessonList({ courseId, lessons, currentId, compact = false, permissions = NONE, onChange, completedIds }: Props) {
   const navigate = useNavigate()
-  const [busy, setBusy] = useState<number | null>(null)
-  const [confirm, setConfirm] = useState<ForumLesson | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const { busy, error, confirm, setConfirm, move, publish, remove } = useLessonActions(courseId, lessons, onChange)
   const manage = !compact && (permissions.canUpdate || permissions.canDelete || permissions.canPublish)
-
-  async function move(lesson: ForumLesson, position: number) {
-    const ids = moveLesson(lessons.map((item) => item.forum_lesson_id), lesson.forum_lesson_id, position)
-    const byId = new Map(lessons.map((item) => [item.forum_lesson_id, item]))
-    const previous = lessons
-    // Actualización optimista; se revierte si la API rechaza el orden.
-    onChange?.(ids.map((id, index) => ({ ...byId.get(id)!, forum_lesson_position: index + 1 })))
-    setBusy(lesson.forum_lesson_id)
-    setError(null)
-    try {
-      const saved = await reorderLessons(courseId, ids)
-      // La respuesta no incluye recursos: se conservan los que ya estaban cargados.
-      onChange?.(sortLessons(saved.map((item) => ({ ...item, resources: byId.get(item.forum_lesson_id)?.resources }))))
-    } catch (failure) {
-      onChange?.(previous)
-      setError(`No se pudo cambiar el orden: ${toApiError(failure).message}`)
-    } finally {
-      setBusy(null)
-    }
-  }
-
-  async function publish(lesson: ForumLesson) {
-    setBusy(lesson.forum_lesson_id)
-    setError(null)
-    try {
-      const saved = await publishLesson(lesson.forum_lesson_id)
-      onChange?.(lessons.map((item) => item.forum_lesson_id === saved.forum_lesson_id ? saved : item))
-    } catch (failure) {
-      setError(toApiError(failure).message)
-    } finally {
-      setBusy(null)
-    }
-  }
-
-  async function remove(lesson: ForumLesson) {
-    setConfirm(null)
-    setBusy(lesson.forum_lesson_id)
-    setError(null)
-    try {
-      await deleteLesson(lesson.forum_lesson_id)
-      onChange?.(lessons.filter((item) => item.forum_lesson_id !== lesson.forum_lesson_id))
-    } catch (failure) {
-      setError(toApiError(failure).message)
-    } finally {
-      setBusy(null)
-    }
-  }
 
   return (
     <div className={`lesson-list ${compact ? 'lesson-list--compact' : ''}`}>

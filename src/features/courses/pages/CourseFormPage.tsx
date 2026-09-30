@@ -1,6 +1,6 @@
 import { type ChangeEvent, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
-import { Button, Card, CardBody, DataIcons, Empty, Field, Form, type FormOption, Spinner } from 'ucebul_mui'
+import { Button, Card, CardBody, DataIcons, Empty, Field, Form, type FormOption, Image, Spinner } from 'ucebul_mui'
 import FieldErrors from '../../../components/FieldErrors'
 import { type ApiError, toApiError } from '../../../lib/api-error'
 import { useRequest } from '../../../lib/useRequest'
@@ -209,7 +209,7 @@ function CourseForm({ course, categoryOptions }: { course?: ForumCourse; categor
           <fieldset disabled={saving}>
             <legend>Portada</legend>
             {course?.forum_course_cover_url && !cover && <figure className="current-cover">
-              <img src={course.forum_course_cover_url} alt="Portada actual del curso" />
+              <Image src={course.forum_course_cover_url} alt="Portada actual del curso" width={160} height={90} />
               <figcaption>Portada actual. Sube otra imagen para reemplazarla.</figcaption>
             </figure>}
             <Field id="forum_course_cover" name="forum_course_cover" label="Imagen de portada (opcional)" component="upload"

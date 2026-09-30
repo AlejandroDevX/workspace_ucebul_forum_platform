@@ -23,7 +23,7 @@ export default function CourseEnrollmentPanel({ course, enrollment }: { course: 
     const summary = enrollment.progress
     return (
       <div className="enrollment-panel is-enrolled">
-        <CourseProgress summary={summary} />
+        <CourseProgress summary={summary} segmented />
         <div className="enrollment-panel__actions">
           {!summary.is_completed && summary.published_lessons > 0 && <ContinueLearning courseId={courseId} started={summary.completed_lessons > 0} />}
           <Link className="text-link" to={`/courses/${courseId}/learn`}>

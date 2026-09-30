@@ -1,10 +1,12 @@
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { Badge, Button, Card, CardBody, DataIcons, Empty, Pagination, Spinner } from 'ucebul_mui'
+import { Button, DataIcons, Empty, Spinner, Table } from 'ucebul_mui'
 import { useRequest } from '../../../lib/useRequest'
+import { useAuthStore } from '../../auth/store/auth.store'
 import { listCourses } from '../api/course.service'
 import CourseActions from '../components/CourseActions'
 import CourseCover from '../components/CourseCover'
 import CourseStatusBadge from '../components/CourseStatusBadge'
+import type { ForumCourse } from '../types/course.types'
 import { categoryName, formatDuration } from '../utils/course-format'
 import { instructorLabel, useCoursePermissions } from '../utils/useCoursePermissions'
 
@@ -18,6 +20,35 @@ export default function AdminCoursesPage() {
   const { userId, canCreate } = useCoursePermissions()
   const courses = useRequest(`admin-courses-${page}`, (signal) => listCourses({ page, per_page: PER_PAGE }, signal))
   const result = courses.data
+  const canViewLessons = useAuthStore((state) => state.hasPermission('forum.lessons.view'))
+  const updateCourse = (updated: ForumCourse) => courses.setData((current) => current && {
+    ...current,
+    data: current.data.map((item) => item.forum_course_id === updated.forum_course_id ? updated : item),
+  })
+
+  const columns = [
+    { key: 'course', name: 'Curso' },
+    { key: 'status', name: 'Estado', width: '120px' },
+    { key: 'instructor', name: 'Instructor', width: '140px' },
+    { key: 'actions', name: <span className="sr-only">Acciones</span> },
+  ]
+
+  const row = (course: ForumCourse) => ({
+    course: <div className="table-course">
+      <CourseCover course={course} className="table-course__cover" />
+      <div className="report-cell">
+        <Link className="table-link" to={`/courses/${course.forum_course_id}`}>{course.forum_course_title}</Link>
+        <span className="muted">{[categoryName(course), formatDuration(course.forum_course_duration_minutes)].filter(Boolean).join(' · ')}</span>
+      </div>
+    </div>,
+    status: <CourseStatusBadge status={course.forum_course_status} />,
+    instructor: instructorLabel(course, userId),
+    actions: <div className="table-actions">
+      {canViewLessons && <Button size="sm" variant="default" onClick={() => navigate(`/admin/courses/${course.forum_course_id}/lessons`)}>
+        Lecciones</Button>}
+      <CourseActions size="sm" course={course} onDeleted={courses.reload} onUpdated={updateCourse} />
+    </div>,
+  })
 
   return (
     <section className="page-section" aria-labelledby="admin-courses-title">
@@ -41,34 +72,11 @@ export default function AdminCoursesPage() {
               buttonIcon={canCreate ? DataIcons.buttons.plus : DataIcons.buttons.arrowLongLeft}
               buttonText={canCreate ? 'Crear curso' : 'Volver al panel'}
               onClickButton={() => navigate(canCreate ? '/admin/courses/new' : '/admin')} />
-          : <>
-              <ul className="admin-list">
-                {result.data.map((course) => (
-                  <li key={course.forum_course_id}>
-                    <Card className="admin-course"><CardBody>
-                      <CourseCover course={course} className="admin-course__cover" />
-                      <div className="admin-course__info">
-                        <div className="course-card__tags">
-                          <CourseStatusBadge status={course.forum_course_status} />
-                          {categoryName(course) && <Badge variant="info">{categoryName(course)}</Badge>}
-                        </div>
-                        <h2><Link to={`/courses/${course.forum_course_id}`}>{course.forum_course_title}</Link></h2>
-                        <p className="muted">{formatDuration(course.forum_course_duration_minutes)} · {instructorLabel(course, userId)}</p>
-                      </div>
-                      <CourseActions size="sm" course={course} onDeleted={courses.reload}
-                        onUpdated={(updated) => courses.setData((current) => current && {
-                          ...current,
-                          data: current.data.map((item) => item.forum_course_id === updated.forum_course_id ? updated : item),
-                        })} />
-                    </CardBody></Card>
-                  </li>
-                ))}
-              </ul>
-              {result.meta.last_page > 1 && <nav className="pagination-wrap" aria-label="Paginación de cursos">
-                <Pagination totalPages={result.meta.last_page} currentPage={result.meta.current_page}
-                  onChangePage={(next) => setParams({ page: String(next) })} />
-              </nav>}
-            </>)}
+          : <div className="admin-table">
+              <Table columns={columns} data={result.data.map(row)} currentPage={result.meta.current_page}
+                totalPages={Math.max(result.meta.last_page, 1)}
+                onChangePage={(next) => { if (next >= 1 && next <= result.meta.last_page) setParams({ page: String(next) }) }} />
+            </div>)}
       </div>
     </section>
   )

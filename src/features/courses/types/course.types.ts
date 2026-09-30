@@ -1,3 +1,5 @@
+import type { WorkspaceUserSummary } from '../../../lib/workspace-user'
+
 export interface ForumCourseCategory {
   forum_course_category_id: number
   forum_course_category_name: string
@@ -14,6 +16,8 @@ export interface ForumCourse {
   forum_course_id: number
   forum_course_category_id: number
   forum_course_instructor_workspace_user_id: number
+  // Resumen de Workspace añadido por la API; null si no está disponible.
+  forum_course_instructor_workspace_user?: WorkspaceUserSummary | null
   forum_course_title: string
   forum_course_slug: string
   forum_course_summary: string | null
